@@ -1,9 +1,12 @@
 import Link from 'next/link'
-import { getStats } from '@/lib/db'
+import { getStats, initDatabase } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
+  // Initialize database on first visit
+  await initDatabase()
+
   let stats = {
     doctorsCount: 0,
     patientsCount: 0,
