@@ -13,6 +13,98 @@ export const pool = globalForPool.pool ?? new Pool({
 
 if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool
 
+// Initialize database tables
+export async function initDatabase() {
+  try {
+    // Create Doctor table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "Doctor" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "name" VARCHAR(255) NOT NULL,
+        "specialization" VARCHAR(255) NOT NULL,
+        "phone" VARCHAR(50),
+        "email" VARCHAR(255),
+        "telegramId" BIGINT UNIQUE,
+        "isActive" BOOLEAN DEFAULT true,
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
+    // Create Patient table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "Patient" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "name" VARCHAR(255) NOT NULL,
+        "phone" VARCHAR(50) NOT NULL,
+        "birthDate" DATE,
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
+    // Create Room table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "Room" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "name" VARCHAR(100) NOT NULL UNIQUE,
+        "isAvailable" BOOLEAN DEFAULT true,
+        "isDeleted" BOOLEAN DEFAULT false,
+        "deletedAt" TIMESTAMP,
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
+    // Create Appointment table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "Appointment" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "doctorId" UUID NOT NULL REFERENCES "Doctor"("id"),
+        "patientId" UUID NOT NULL REFERENCES "Patient"("id"),
+        "roomId" UUID NOT NULL REFERENCES "Room"("id"),
+        "appointmentDate" DATE NOT NULL,
+        "appointmentTime" TIMESTAMP NOT NULL,
+        "durationMinutes" INTEGER DEFAULT 60,
+        "status" VARCHAR(50) DEFAULT 'scheduled',
+        "notes" TEXT,
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
+    // Insert sample data if tables are empty
+    const doctorCount = await pool.query('SELECT COUNT(*) FROM "Doctor"')
+    if (parseInt(doctorCount.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO "Doctor" ("name", "specialization", "phone", "email") VALUES
+        ('Иванов Иван Иванович', 'Терапевт', '+7 999 123-45-67', 'ivanov@hospital.ru'),
+        ('Петрова Анна Сергеевна', 'Кардиолог', '+7 999 234-56-78', 'petrova@hospital.ru'),
+        ('Сидоров Алексей Петрович', 'Хирург', '+7 999 345-67-89', 'sidorov@hospital.ru')
+      `)
+    }
+
+    const roomCount = await pool.query('SELECT COUNT(*) FROM "Room"')
+    if (parseInt(roomCount.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO "Room" ("name", "isAvailable") VALUES
+        ('Кабинет 1', true),
+        ('Кабинет 2', true),
+        ('Кабинет 3', true),
+        ('Кабинет 4', true),
+        ('Кабинет 5', true),
+        ('Кабинет 6', true)
+      `)
+    }
+
+    console.log('Database initialized successfully!')
+    return true
+  } catch (error) {
+    console.error('Error initializing database:', error)
+    return false
+  }
+}
+
 // Doctors
 export async function getDoctors() {
   const result = await pool.query('SELECT * FROM "Doctor" WHERE "isActive" = true ORDER BY name')
@@ -130,23 +222,34 @@ export async function createAppointment(data: {
 
 // Stats
 export async function getStats() {
-  const doctors = await pool.query('SELECT COUNT(*) as count FROM "Doctor" WHERE "isActive" = true')
-  const patients = await pool.query('SELECT COUNT(*) as count FROM "Patient"')
-  const rooms = await pool.query('SELECT COUNT(*) as count FROM "Room" WHERE "isAvailable" = true AND "isDeleted" = false')
-  const appointments = await pool.query('SELECT COUNT(*) as count FROM "Appointment"')
-  
-  const today = new Date().toISOString().split('T')[0]
-  const todayAppointments = await pool.query(
-    `SELECT COUNT(*) as count FROM "Appointment" 
-     WHERE "appointmentDate" >= $1 AND "appointmentDate" < $2`,
-    [today + ' 00:00:00', today + ' 23:59:59']
-  )
-  
-  return {
-    doctorsCount: parseInt(doctors.rows[0].count),
-    patientsCount: parseInt(patients.rows[0].count),
-    roomsCount: parseInt(rooms.rows[0].count),
-    appointmentsToday: parseInt(todayAppointments.rows[0].count),
-    totalAppointments: parseInt(appointments.rows[0].count)
+  try {
+    const doctors = await pool.query('SELECT COUNT(*) as count FROM "Doctor" WHERE "isActive" = true')
+    const patients = await pool.query('SELECT COUNT(*) as count FROM "Patient"')
+    const rooms = await pool.query('SELECT COUNT(*) as count FROM "Room" WHERE "isAvailable" = true AND "isDeleted" = false')
+    const appointments = await pool.query('SELECT COUNT(*) as count FROM "Appointment"')
+    
+    const today = new Date().toISOString().split('T')[0]
+    const todayAppointments = await pool.query(
+      `SELECT COUNT(*) as count FROM "Appointment" 
+       WHERE "appointmentDate" >= $1 AND "appointmentDate" < $2`,
+      [today + ' 00:00:00', today + ' 23:59:59']
+    )
+    
+    return {
+      doctorsCount: parseInt(doctors.rows[0].count),
+      patientsCount: parseInt(patients.rows[0].count),
+      roomsCount: parseInt(rooms.rows[0].count),
+      appointmentsToday: parseInt(todayAppointments.rows[0].count),
+      totalAppointments: parseInt(appointments.rows[0].count)
+    }
+  } catch (error) {
+    // Tables might not exist yet
+    return {
+      doctorsCount: 0,
+      patientsCount: 0,
+      roomsCount: 0,
+      appointmentsToday: 0,
+      totalAppointments: 0
+    }
   }
 }
