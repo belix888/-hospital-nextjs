@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("user") // admin, doctor, user
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Связи
+  doctorProfile Doctor?
+}
+
+model Doctor {
+  id             String   @id @default(cuid())
+  userId         String?  @unique
+  name           String
+  specialization String
+  phone          String?
+  email          String?
+  telegramId     BigInt?  @unique
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Связи
+  user        User?         @relation(fields: [userId], references: [id])
+  appointments Appointment[]
+}
+
+model Patient {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  birthDate DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Связи
+  appointments Appointment[]
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  isAvailable Boolean  @default(true)
+  isDeleted   Boolean  @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Связи
+  appointments Appointment[]
+}
+
+model Appointment {
+  id               String   @id @default(cuid())
+  doctorId         String
+  patientId        String
+  roomId           String
+  appointmentDate  DateTime
+  appointmentTime  DateTime
+  durationMinutes  Int      @default(60)
+  status           String   @default("scheduled") // scheduled, completed, cancelled
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Связи
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+  room   Room   @relation(fields: [roomId], references: [id])
+
+  // Индексы
+  @@index([appointmentDate, roomId])
+  @@index([doctorId, appointmentDate])
+}
