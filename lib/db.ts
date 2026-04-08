@@ -232,6 +232,37 @@ export async function createAppointment(data: {
   durationMinutes?: number
   notes?: string
 }) {
+  // Check if room is already booked at this time
+  const startTime = new Date(data.appointmentTime)
+  const endTime = new Date(startTime.getTime() + (data.durationMinutes || 60) * 60000)
+  
+  const { data: existingAppointments, error: checkError } = await supabase
+    .from('Appointment')
+    .select('*, Room:roomId(name), Doctor:doctorId(name, specialization)')
+    .eq('appointmentDate', data.appointmentDate)
+    .eq('status', 'scheduled')
+    .or(`roomId.eq.${data.roomId},doctorId.eq.${data.doctorId}`)
+
+  if (checkError) throw checkError
+
+  if (existingAppointments && existingAppointments.length > 0) {
+    // Check for overlapping appointments (same room OR same doctor)
+    for (const apt of existingAppointments) {
+      const existingStart = new Date(apt.appointmentTime)
+      const existingEnd = new Date(existingStart.getTime() + (apt.durationMinutes || 60) * 60000)
+      
+      // Check if times overlap
+      if (startTime < existingEnd && endTime > existingStart) {
+        // Determine if it's room conflict or doctor conflict
+        if (apt.roomId === data.roomId) {
+          throw new Error(`Кабинет "${apt.Room?.name || 'кабинет'}" уже занят в это время (${existingStart.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}). Выберите другое время или кабинет.`)
+        } else if (apt.doctorId === data.doctorId) {
+          throw new Error(`Врач "${apt.Doctor?.name || 'врач'}" уже занят в это время (${existingStart.toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}). Выберите другое время.`)
+        }
+      }
+    }
+  }
+
   const { data: result, error } = await supabase
     .from('Appointment')
     .insert({
