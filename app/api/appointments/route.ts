@@ -34,6 +34,9 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Ensure durationMinutes is a number
+    const duration = typeof durationMinutes === 'string' ? parseInt(durationMinutes, 10) : (durationMinutes || 60)
+
     // Fix: ensure timestamp is in correct format YYYY-MM-DDTHH:MM:SS
     let finalTime = appointmentTime
     
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log('Creating appointment with:', { appointmentDate, appointmentTime: finalTime })
+    console.log('Creating appointment with:', { appointmentDate, appointmentTime: finalTime, durationMinutes: duration })
 
     const appointment = await createAppointment({
       doctorId,
@@ -60,7 +63,7 @@ export async function POST(request: Request) {
       roomId,
       appointmentDate: appointmentDate,
       appointmentTime: finalTime,
-      durationMinutes,
+      durationMinutes: duration,
       notes
     })
 

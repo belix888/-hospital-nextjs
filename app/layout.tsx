@@ -41,6 +41,9 @@ export default function RootLayout({
                       <a href="/schedule" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
                         Календарь
                       </a>
+                      <a href="/doctor" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
+                        Кабинет врача
+                      </a>
                     </div>
                   </div>
                   <AuthNavigation />

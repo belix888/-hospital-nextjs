@@ -69,6 +69,12 @@ export function AuthCheck() {
           ➕ Создать новую запись
         </Link>
         <Link
+          href={`/doctor`}
+          className="block w-full text-center px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-md"
+        >
+          🏠 Личный кабинет
+        </Link>
+        <Link
           href={`/schedule?doctorId=${user.doctorId}`}
           className="block w-full text-center px-6 py-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 shadow-md"
         >
