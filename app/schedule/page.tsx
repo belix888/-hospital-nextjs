@@ -49,7 +49,7 @@ export default function SchedulePage() {
     
     console.log('Fetching appointments for', start, 'to', end)
     
-    fetch(`/api/appointments?startDate=${start}&endDate=${end}`)
+    fetch(`/api/appointments?startDate=${start}&endDate=${end}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         console.log('Got appointments:', data)

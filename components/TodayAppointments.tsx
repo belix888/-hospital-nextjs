@@ -33,7 +33,7 @@ export function TodayAppointments() {
         ? `/api/appointments?date=${currentDate}&doctorId=${user.doctorId}`
         : `/api/appointments?date=${currentDate}`
       
-      fetch(url)
+      fetch(url, { cache: 'no-store' })
         .then(r => r.json())
         .then(data => {
           setAppointments(data.slice(0, 5))
