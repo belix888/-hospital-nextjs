@@ -18,9 +18,9 @@ export async function GET(request: Request) {
 
     const appointments = await getAppointments({ date: date || undefined, doctorId: doctorId || undefined })
     return Response.json(appointments)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching appointments:', error)
-    return Response.json([], { status: 200 })
+    return Response.json({ error: error.message }, { status: 500 })
   }
 }
 
@@ -38,15 +38,15 @@ export async function POST(request: Request) {
       doctorId,
       patientId,
       roomId,
-      appointmentDate: new Date(appointmentDate),
-      appointmentTime: new Date(appointmentTime),
+      appointmentDate: appointmentDate,
+      appointmentTime: appointmentDate + 'T' + appointmentTime + ':00',
       durationMinutes,
       notes
     })
 
     return Response.json(appointment)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating appointment:', error)
-    return Response.json({ error: 'Failed to create appointment' }, { status: 500 })
+    return Response.json({ error: error.message || 'Failed to create appointment' }, { status: 500 })
   }
 }

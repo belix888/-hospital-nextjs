@@ -5,9 +5,9 @@ export async function GET() {
     await initDatabase()
     const doctors = await getDoctors()
     return Response.json(doctors)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching doctors:', error)
-    return Response.json([], { status: 200 })
+    return Response.json({ error: error.message }, { status: 500 })
   }
 }
 

@@ -5,9 +5,9 @@ export async function GET() {
     await initDatabase()
     const rooms = await getRooms()
     return Response.json(rooms)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching rooms:', error)
-    return Response.json([], { status: 200 })
+    return Response.json({ error: error.message }, { status: 500 })
   }
 }
 

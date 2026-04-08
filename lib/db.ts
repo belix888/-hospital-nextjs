@@ -1,293 +1,229 @@
-import { Pool } from 'pg'
+import { createClient } from '@supabase/supabase-js'
 
-const globalForPool = globalThis as unknown as {
-  pool: Pool | undefined
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ezltbmyhpmnbfeboexlz.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_dtuVEjfn7Enw_Ta-CfLmwg_dnOLIYYb'
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:B8nvmDackErJTNgJ@db.ezltbmyhpmnbfeboexlz.supabase.co:5432/postgres'
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
-if (!process.env.DATABASE_URL) {
-  console.warn('DATABASE_URL not set, using fallback')
-}
-
-export const pool = globalForPool.pool ?? new Pool({
-  connectionString: connectionString,
-  ssl: {
-    rejectUnauthorized: false
-  }
-})
-
-if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool
-
-// Initialize database tables
+// Initialize database tables - tables already exist in Supabase
 export async function initDatabase() {
   try {
-    // Create Doctor table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "Doctor" (
-        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "name" VARCHAR(255) NOT NULL,
-        "specialization" VARCHAR(255) NOT NULL,
-        "phone" VARCHAR(50),
-        "email" VARCHAR(255),
-        "telegramId" BIGINT UNIQUE,
-        "isActive" BOOLEAN DEFAULT true,
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-
-    // Create Patient table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "Patient" (
-        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "name" VARCHAR(255) NOT NULL,
-        "phone" VARCHAR(50) NOT NULL,
-        "birthDate" DATE,
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-
-    // Create Room table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "Room" (
-        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "name" VARCHAR(100) NOT NULL UNIQUE,
-        "isAvailable" BOOLEAN DEFAULT true,
-        "isDeleted" BOOLEAN DEFAULT false,
-        "deletedAt" TIMESTAMP,
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-
-    // Create Appointment table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "Appointment" (
-        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "doctorId" UUID NOT NULL REFERENCES "Doctor"("id"),
-        "patientId" UUID NOT NULL REFERENCES "Patient"("id"),
-        "roomId" UUID NOT NULL REFERENCES "Room"("id"),
-        "appointmentDate" DATE NOT NULL,
-        "appointmentTime" TIMESTAMP NOT NULL,
-        "durationMinutes" INTEGER DEFAULT 60,
-        "status" VARCHAR(50) DEFAULT 'scheduled',
-        "notes" TEXT,
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-
-    // Create User table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS "User" (
-        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        "email" VARCHAR(255) NOT NULL UNIQUE,
-        "password" VARCHAR(255) NOT NULL,
-        "name" VARCHAR(255),
-        "role" VARCHAR(50) DEFAULT 'user',
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-
-    // Insert sample data if tables are empty
-    const doctorCount = await pool.query('SELECT COUNT(*) FROM "Doctor"')
-    if (parseInt(doctorCount.rows[0].count) === 0) {
-      await pool.query(`
-        INSERT INTO "Doctor" ("name", "specialization", "phone", "email") VALUES
-        ('Иванов Иван Иванович', 'Терапевт', '+7 999 123-45-67', 'ivanov@hospital.ru'),
-        ('Петрова Анна Сергеевна', 'Кардиолог', '+7 999 234-56-78', 'petrova@hospital.ru'),
-        ('Сидоров Алексей Петрович', 'Хирург', '+7 999 345-67-89', 'sidorov@hospital.ru')
-      `)
-    }
-
-    // Create default admin user if not exists
-    const userCount = await pool.query('SELECT COUNT(*) FROM "User"')
-    if (parseInt(userCount.rows[0].count) === 0) {
-      await pool.query(`
-        INSERT INTO "User" (email, password, name, role) VALUES
-        ('admin@hospital.ru', 'admin123', 'Администратор', 'admin')
-      `)
-    }
-
-    const roomCount = await pool.query('SELECT COUNT(*) FROM "Room"')
-    if (parseInt(roomCount.rows[0].count) === 0) {
-      await pool.query(`
-        INSERT INTO "Room" ("name", "isAvailable") VALUES
-        ('Кабинет 1', true),
-        ('Кабинет 2', true),
-        ('Кабинет 3', true),
-        ('Кабинет 4', true),
-        ('Кабинет 5', true),
-        ('Кабинет 6', true)
-      `)
-    }
-
-    console.log('Database initialized successfully!')
+    // Just verify connection works by querying a simple table
+    await supabase.from('User').select('id').limit(1)
+    console.log('Database connected successfully!')
     return true
   } catch (error) {
-    console.error('Error initializing database:', error)
+    console.error('Database connection error:', error)
     return false
   }
 }
 
 // Doctors
 export async function getDoctors() {
-  const result = await pool.query('SELECT * FROM "Doctor" WHERE "isActive" = true ORDER BY name')
-  return result.rows
+  const { data, error } = await supabase
+    .from('Doctor')
+    .select('*')
+    .eq('isActive', true)
+    .order('name')
+  
+  if (error) throw error
+  return data || []
 }
 
 export async function getAllDoctors() {
-  const result = await pool.query('SELECT * FROM "Doctor" ORDER BY name')
-  return result.rows
+  const { data, error } = await supabase
+    .from('Doctor')
+    .select('*')
+    .order('name')
+  
+  if (error) throw error
+  return data || []
 }
 
-export async function createDoctor(data: { name: string; specialization: string; phone?: string; email?: string; telegramId?: bigint }) {
-  const result = await pool.query(
-    `INSERT INTO "Doctor" (name, specialization, phone, email, "telegramId", "isActive", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, true, NOW(), NOW())
-     RETURNING *`,
-    [data.name, data.specialization, data.phone || null, data.email || null, data.telegramId || null]
-  )
-  return result.rows[0]
+export async function createDoctor(data: { name: string; specialization: string; phone?: string; email?: string }) {
+  const { data: result, error } = await supabase
+    .from('Doctor')
+    .insert({
+      name: data.name,
+      specialization: data.specialization,
+      phone: data.phone || null,
+      email: data.email || null,
+      isActive: true
+    })
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
 }
 
 // Patients
 export async function getPatients() {
-  const result = await pool.query('SELECT * FROM "Patient" ORDER BY name')
-  return result.rows
+  const { data, error } = await supabase
+    .from('Patient')
+    .select('*')
+    .order('name')
+  
+  if (error) throw error
+  return data || []
 }
 
-export async function createPatient(data: { name: string; phone: string; birthDate?: Date }) {
-  const result = await pool.query(
-    `INSERT INTO "Patient" (name, phone, "birthDate", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, NOW(), NOW())
-     RETURNING *`,
-    [data.name, data.phone, data.birthDate || null]
-  )
-  return result.rows[0]
+export async function createPatient(data: { name: string; phone: string; birthDate?: string }) {
+  const { data: result, error } = await supabase
+    .from('Patient')
+    .insert({
+      name: data.name,
+      phone: data.phone,
+      birthDate: data.birthDate || null
+    })
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
 }
 
 // Rooms
 export async function getRooms() {
-  const result = await pool.query('SELECT * FROM "Room" WHERE "isDeleted" = false ORDER BY name')
-  return result.rows
+  const { data, error } = await supabase
+    .from('Room')
+    .select('*')
+    .eq('isDeleted', false)
+    .order('name')
+  
+  if (error) throw error
+  return data || []
 }
 
 export async function createRoom(data: { name: string; isAvailable?: boolean }) {
-  const result = await pool.query(
-    `INSERT INTO "Room" (name, "isAvailable", "isDeleted", "createdAt", "updatedAt")
-     VALUES ($1, $2, false, NOW(), NOW())
-     RETURNING *`,
-    [data.name, data.isAvailable ?? true]
-  )
-  return result.rows[0]
+  const { data: result, error } = await supabase
+    .from('Room')
+    .insert({
+      name: data.name,
+      isAvailable: data.isAvailable ?? true,
+      isDeleted: false
+    })
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
 }
 
 // Appointments
 export async function getAppointments(filters?: { date?: string; doctorId?: string }) {
-  let query = `
-    SELECT a.*, d.name as doctor_name, d.specialization as doctor_specialization,
-           p.name as patient_name, p.phone as patient_phone,
-           r.name as room_name
-    FROM "Appointment" a
-    JOIN "Doctor" d ON a."doctorId" = d.id
-    JOIN "Patient" p ON a."patientId" = p.id
-    JOIN "Room" r ON a."roomId" = r.id
-  `
-  
-  const conditions: string[] = []
-  const params: any[] = []
+  let query = supabase
+    .from('Appointment')
+    .select(`
+      *,
+      Doctor:doctorId(name, specialization),
+      Patient:patientId(name, phone),
+      Room:roomId(name)
+    `)
   
   if (filters?.date) {
-    params.push(filters.date + ' 00:00:00', filters.date + ' 23:59:59')
-    conditions.push(`a."appointmentDate" >= $${params.length - 1} AND a."appointmentDate" <= $${params.length}`)
+    query = query.gte('appointmentDate', filters.date + ' 00:00:00')
+               .lte('appointmentDate', filters.date + ' 23:59:59')
   }
   
   if (filters?.doctorId) {
-    params.push(filters.doctorId)
-    conditions.push(`a."doctorId" = $${params.length}`)
+    query = query.eq('doctorId', filters.doctorId)
   }
   
-  if (conditions.length > 0) {
-    query += ' WHERE ' + conditions.join(' AND ')
-  }
+  const { data, error } = await query.order('appointmentDate').order('appointmentTime')
   
-  query += ' ORDER BY a."appointmentDate", a."appointmentTime"'
+  if (error) throw error
   
-  const result = await pool.query(query, params)
-  return result.rows
+  // Flatten the data
+  return (data || []).map(item => ({
+    ...item,
+    doctor_name: item.Doctor?.name,
+    doctor_specialization: item.Doctor?.specialization,
+    patient_name: item.Patient?.name,
+    patient_phone: item.Patient?.phone,
+    room_name: item.Room?.name
+  }))
 }
 
 export async function getAppointmentsByDateRange(startDate: string, endDate: string) {
-  const query = `
-    SELECT a.*, d.name as doctor_name, d.specialization as doctor_specialization,
-           p.name as patient_name, p.phone as patient_phone,
-           r.name as room_name
-    FROM "Appointment" a
-    JOIN "Doctor" d ON a."doctorId" = d.id
-    JOIN "Patient" p ON a."patientId" = p.id
-    JOIN "Room" r ON a."roomId" = r.id
-    WHERE a."appointmentDate" >= $1 AND a."appointmentDate" <= $2
-    ORDER BY a."appointmentDate", a."appointmentTime"
-  `
-  const result = await pool.query(query, [startDate + ' 00:00:00', endDate + ' 23:59:59'])
-  return result.rows
+  const { data, error } = await supabase
+    .from('Appointment')
+    .select(`
+      *,
+      Doctor:doctorId(name, specialization),
+      Patient:patientId(name, phone),
+      Room:roomId(name)
+    `)
+    .gte('appointmentDate', startDate + ' 00:00:00')
+    .lte('appointmentDate', endDate + ' 23:59:59')
+    .order('appointmentDate')
+    .order('appointmentTime')
+  
+  if (error) throw error
+  
+  return (data || []).map(item => ({
+    ...item,
+    doctor_name: item.Doctor?.name,
+    doctor_specialization: item.Doctor?.specialization,
+    patient_name: item.Patient?.name,
+    patient_phone: item.Patient?.phone,
+    room_name: item.Room?.name
+  }))
 }
 
 export async function createAppointment(data: {
   doctorId: string
   patientId: string
   roomId: string
-  appointmentDate: Date
-  appointmentTime: Date
+  appointmentDate: string
+  appointmentTime: string
   durationMinutes?: number
   notes?: string
 }) {
-  const result = await pool.query(
-    `INSERT INTO "Appointment" 
-     ("doctorId", "patientId", "roomId", "appointmentDate", "appointmentTime", "durationMinutes", "notes", "status", "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, $6, $7, 'scheduled', NOW(), NOW())
-     RETURNING *`,
-    [
-      data.doctorId,
-      data.patientId,
-      data.roomId,
-      data.appointmentDate,
-      data.appointmentTime,
-      data.durationMinutes || 60,
-      data.notes || ''
-    ]
-  )
-  return result.rows[0]
+  const { data: result, error } = await supabase
+    .from('Appointment')
+    .insert({
+      doctorId: data.doctorId,
+      patientId: data.patientId,
+      roomId: data.roomId,
+      appointmentDate: data.appointmentDate,
+      appointmentTime: data.appointmentTime,
+      durationMinutes: data.durationMinutes || 60,
+      notes: data.notes || '',
+      status: 'scheduled'
+    })
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
 }
 
 // Stats
 export async function getStats() {
   try {
-    const doctors = await pool.query('SELECT COUNT(*) as count FROM "Doctor" WHERE "isActive" = true')
-    const patients = await pool.query('SELECT COUNT(*) as count FROM "Patient"')
-    const rooms = await pool.query('SELECT COUNT(*) as count FROM "Room" WHERE "isAvailable" = true AND "isDeleted" = false')
-    const appointments = await pool.query('SELECT COUNT(*) as count FROM "Appointment"')
+    const [doctors, patients, rooms, appointments] = await Promise.all([
+      supabase.from('Doctor').select('*', { count: 'exact', head: true }).eq('isActive', true),
+      supabase.from('Patient').select('*', { count: 'exact', head: true }),
+      supabase.from('Room').select('*', { count: 'exact', head: true }).eq('isAvailable', true).eq('isDeleted', false),
+      supabase.from('Appointment').select('*', { count: 'exact', head: true })
+    ])
     
     const today = new Date().toISOString().split('T')[0]
-    const todayAppointments = await pool.query(
-      `SELECT COUNT(*) as count FROM "Appointment" 
-       WHERE "appointmentDate" >= $1 AND "appointmentDate" < $2`,
-      [today + ' 00:00:00', today + ' 23:59:59']
-    )
+    const todayAppointments = await supabase
+      .from('Appointment')
+      .select('*', { count: 'exact', head: true })
+      .gte('appointmentDate', today + ' 00:00:00')
+      .lte('appointmentDate', today + ' 23:59:59')
     
     return {
-      doctorsCount: parseInt(doctors.rows[0].count),
-      patientsCount: parseInt(patients.rows[0].count),
-      roomsCount: parseInt(rooms.rows[0].count),
-      appointmentsToday: parseInt(todayAppointments.rows[0].count),
-      totalAppointments: parseInt(appointments.rows[0].count)
+      doctorsCount: doctors.count || 0,
+      patientsCount: patients.count || 0,
+      roomsCount: rooms.count || 0,
+      appointmentsToday: todayAppointments.count || 0,
+      totalAppointments: appointments.count || 0
     }
   } catch (error) {
-    // Tables might not exist yet
     return {
       doctorsCount: 0,
       patientsCount: 0,
@@ -300,11 +236,17 @@ export async function getStats() {
 
 // Users
 export async function createUser(data: { email: string; password: string; name?: string; role?: string }) {
-  const result = await pool.query(
-    `INSERT INTO "User" (email, password, name, role, "createdAt", "updatedAt")
-     VALUES ($1, $2, $3, $4, NOW(), NOW())
-     RETURNING *`,
-    [data.email, data.password, data.name || null, data.role || 'user']
-  )
-  return result.rows[0]
+  const { data: result, error } = await supabase
+    .from('User')
+    .insert({
+      email: data.email,
+      password: data.password,
+      name: data.name || null,
+      role: data.role || 'user'
+    })
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
 }
