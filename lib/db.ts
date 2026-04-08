@@ -184,15 +184,12 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
   
   const { data, error } = await query.order('appointmentDate').order('appointmentTime')
   
-  if (error) throw error
-  
   // Flatten the data and calculate end time - use stored value or default 60
   return (data || []).map(item => {
     const startTime = new Date(item.appointmentTime)
-    // If stored duration is > 120 (likely corrupted), use 60
-    let duration = Number(item.durationMinutes) || 60
-    if (duration > 120) duration = 60
-    const endTime = new Date(startTime.getTime() + duration * 60000)
+    // Use stored duration or default to 60
+    let duration = parseInt(String(item.durationMinutes), 10) || 60
+    const endTime = new Date(startTime.getTime() + duration * 60 * 1000)
     return {
       ...item,
       durationMinutes: duration,
@@ -204,6 +201,7 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
       endTime: endTime.toISOString()
     }
   })
+}
 }
 
 export async function getAppointmentsByDateRange(startDate: string, endDate: string) {
@@ -225,10 +223,9 @@ export async function getAppointmentsByDateRange(startDate: string, endDate: str
   // Flatten the data and calculate end time - use stored value or default 60
   return (data || []).map(item => {
     const startTime = new Date(item.appointmentTime)
-    // If stored duration is > 120 (likely corrupted), use 60
-    let duration = Number(item.durationMinutes) || 60
-    if (duration > 120) duration = 60
-    const endTime = new Date(startTime.getTime() + duration * 60000)
+    // Use stored duration or default to 60
+    let duration = parseInt(String(item.durationMinutes), 10) || 60
+    const endTime = new Date(startTime.getTime() + duration * 60 * 1000)
     return {
       ...item,
       durationMinutes: duration,
