@@ -127,7 +127,7 @@ export default function SchedulePage() {
     return days
   }
 
-  const formatTime = (dateStr: string) => {
+  const formatTime = (dateStr: string | null | undefined) => {
     if (!dateStr) return ''
     // Если строка содержит только время (HH:MM), выводим как есть
     if (dateStr.match(/^\d{2}:\d{2}(:\d{2})?$/)) {
@@ -142,13 +142,22 @@ export default function SchedulePage() {
       }
     }
     // Иначе пробуем парсить как дату
-    const date = new Date(dateStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    try {
+      const date = new Date(dateStr)
+      return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return dateStr
+    }
   }
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return ''
+    try {
+      const date = new Date(dateStr)
+      return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+    } catch {
+      return dateStr
+    }
   }
 
   const monthNames = [

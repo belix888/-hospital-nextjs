@@ -44,9 +44,14 @@ export function AuthCheck() {
     }
   }, [user])
 
-  const formatTime = (timeStr: string) => {
-    const date = new Date(timeStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+  const formatTime = (timeStr: string | null | undefined) => {
+    if (!timeStr) return ''
+    try {
+      const date = new Date(timeStr)
+      return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return timeStr
+    }
   }
 
   if (loading) {

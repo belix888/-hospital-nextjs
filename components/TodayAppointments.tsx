@@ -43,10 +43,14 @@ export function TodayAppointments() {
     }
   }, [user, loading, currentDate])
 
-  const formatTime = (timeStr: string) => {
+  const formatTime = (timeStr: string | null | undefined) => {
     if (!timeStr) return ''
-    const date = new Date(timeStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    try {
+      const date = new Date(timeStr)
+      return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return timeStr
+    }
   }
 
   // Show only for logged in users (doctors and admins)

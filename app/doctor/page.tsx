@@ -138,21 +138,26 @@ function DoctorCabinet() {
     }
   }
 
-  const formatTime = (timeStr: string) => {
+  const formatTime = (timeStr: string | null | undefined) => {
     if (!timeStr) return ''
-    const date = new Date(timeStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    try {
+      const date = new Date(timeStr)
+      return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return timeStr
+    }
   }
 
   const getEndTime = (apt: Appointment) => {
-    const start = new Date(apt.appointmentTime)
-    const duration = apt.durationMinutes || 60
-    const end = new Date(start.getTime() + duration * 60000)
-    // Извлекаем время напрямую из ISO строки
-    if (end.toISOString) {
-      return end.toISOString().split('T')[1]?.substring(0, 5) || end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    if (!apt.appointmentTime) return ''
+    try {
+      const start = new Date(apt.appointmentTime)
+      const duration = apt.durationMinutes || 60
+      const end = new Date(start.getTime() + duration * 60000)
+      return formatTime(end.toISOString())
+    } catch {
+      return ''
     }
-    return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 
   // Sync date with URL parameter from schedule
@@ -333,9 +338,10 @@ function DoctorCabinet() {
               <p>
                 {formatTime(selectedAppointment.appointmentTime)} - {
                   (() => {
+                    if (!selectedAppointment.appointmentTime) return ''
                     const start = new Date(selectedAppointment.appointmentTime)
                     const end = new Date(start.getTime() + (selectedAppointment.durationMinutes + extendMinutes) * 60000)
-                    return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+                    return formatTime(end.toISOString())
                   })()
                 }
               </p>

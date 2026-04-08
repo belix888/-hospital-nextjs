@@ -18,11 +18,30 @@ export async function GET(request: Request) {
     const appointments = await getAppointmentsByDateRange(startDate, endDate)
     console.log('Found appointments:', appointments.length)
 
+    // Helper to safely format dates
+    const formatDate = (dateStr: string | null | undefined) => {
+      if (!dateStr) return ''
+      try {
+        return new Date(dateStr).toLocaleDateString('ru')
+      } catch {
+        return dateStr
+      }
+    }
+
+    const formatTime = (timeStr: string | null | undefined) => {
+      if (!timeStr) return ''
+      try {
+        return new Date(timeStr).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
+      } catch {
+        return timeStr
+      }
+    }
+
     // Create CSV content
     const headers = ['Дата', 'Время', 'Врач', 'Специализация', 'Пациент', 'Телефон', 'Кабинет', 'Статус', 'Заметки']
     const rows = appointments.map((apt: any) => [
-      new Date(apt.appointmentDate).toLocaleDateString('ru'),
-      new Date(apt.appointmentTime).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      formatDate(apt.appointmentDate),
+      formatTime(apt.appointmentTime),
       apt.doctor_name || '',
       apt.doctor_specialization || '',
       apt.patient_name || '',

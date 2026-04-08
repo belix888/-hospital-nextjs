@@ -21,6 +21,24 @@ export default function AdminAppointmentsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
 
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return ''
+    try {
+      return new Date(dateStr).toLocaleDateString('ru')
+    } catch {
+      return dateStr
+    }
+  }
+
+  const formatTime = (timeStr: string | null | undefined) => {
+    if (!timeStr) return ''
+    try {
+      return new Date(timeStr).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
+    } catch {
+      return timeStr
+    }
+  }
+
   useEffect(() => {
     fetchAppointments()
   }, [])
@@ -83,9 +101,9 @@ export default function AdminAppointmentsPage() {
             <tbody className="divide-y divide-gray-200">
               {filteredAppointments.map((apt) => (
                 <tr key={apt.id}>
-                  <td className="px-6 py-4">{new Date(apt.appointmentDate).toLocaleDateString('ru')}</td>
+                  <td className="px-6 py-4">{formatDate(apt.appointmentDate)}</td>
                   <td className="px-6 py-4">
-                    {new Date(apt.appointmentTime).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })}
+                    {formatTime(apt.appointmentTime)}
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-medium">{apt.doctor_name}</div>
