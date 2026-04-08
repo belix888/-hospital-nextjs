@@ -189,8 +189,8 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
   // Flatten the data and calculate end time
   return (data || []).map(item => {
     const startTime = new Date(item.appointmentTime)
-    // Cap duration at 180 minutes (3 hours) to prevent display issues
-    const duration = Math.min(item.durationMinutes || 60, 180)
+    // Force use of 60 minutes default, ignore stored value if > 180
+    const duration = (item.durationMinutes && item.durationMinutes <= 180) ? item.durationMinutes : 60
     const endTime = new Date(startTime.getTime() + duration * 60000)
     return {
       ...item,
@@ -224,8 +224,8 @@ export async function getAppointmentsByDateRange(startDate: string, endDate: str
   // Flatten the data and calculate end time
   return (data || []).map(item => {
     const startTime = new Date(item.appointmentTime)
-    // Cap duration at 180 minutes (3 hours) to prevent display issues
-    const duration = Math.min(item.durationMinutes || 60, 180)
+    // Force use of 60 minutes default, ignore stored value if > 180
+    const duration = (item.durationMinutes && item.durationMinutes <= 180) ? item.durationMinutes : 60
     const endTime = new Date(startTime.getTime() + duration * 60000)
     return {
       ...item,
