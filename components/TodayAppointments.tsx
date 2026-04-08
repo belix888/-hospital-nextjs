@@ -45,12 +45,8 @@ export function TodayAppointments() {
 
   const formatTime = (timeStr: string) => {
     if (!timeStr) return ''
-    // Append Z if not present to treat as UTC
-    const isoStr = timeStr.includes('Z') || timeStr.includes('+') 
-      ? timeStr 
-      : timeStr + 'Z'
-    const date = new Date(isoStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+    const date = new Date(timeStr)
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 
   // Show only for logged in users (doctors and admins)

@@ -140,18 +140,15 @@ function DoctorCabinet() {
 
   const formatTime = (timeStr: string) => {
     if (!timeStr) return ''
-    const isoStr = timeStr.includes('Z') || timeStr.includes('+') 
-      ? timeStr 
-      : timeStr + 'Z'
-    const date = new Date(isoStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+    const date = new Date(timeStr)
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 
   const getEndTime = (apt: Appointment) => {
     const start = new Date(apt.appointmentTime)
     const duration = apt.durationMinutes || 60
     const end = new Date(start.getTime() + duration * 60000)
-    return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+    return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 
   // Sync date with URL parameter from schedule
