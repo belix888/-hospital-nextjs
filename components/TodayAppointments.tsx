@@ -18,35 +18,38 @@ export function TodayAppointments() {
   const { user, loading } = useAuth()
   const [appointments, setAppointments] = useState<AppointmentInfo[]>([])
   const [loadingData, setLoadingData] = useState(false)
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('date') || new Date().toISOString().split('T')[0]
+    }
+    return new Date().toISOString().split('T')[0]
+  })
 
   useEffect(() => {
     if (!loading && user) {
       setLoadingData(true)
-      const today = new Date().toISOString().split('T')[0]
-      
       const url = user.role === 'doctor' && user.doctorId 
-        ? `/api/appointments?date=${today}&doctorId=${user.doctorId}`
-        : `/api/appointments?date=${today}`
-      
-      console.log('TodayAppointments: Fetching from', url)
+        ? `/api/appointments?date=${currentDate}&doctorId=${user.doctorId}`
+        : `/api/appointments?date=${currentDate}`
       
       fetch(url)
         .then(r => r.json())
         .then(data => {
-          console.log('TodayAppointments: Got data', data)
           setAppointments(data.slice(0, 5))
           setLoadingData(false)
         })
         .catch(() => setLoadingData(false))
     }
-  }, [user, loading])
+  }, [user, loading, currentDate])
 
   const formatTime = (timeStr: string) => {
     if (!timeStr) return ''
-    // Handle both ISO format with Z and without
-    const date = timeStr.includes('Z') 
-      ? new Date(timeStr) 
-      : new Date(timeStr.replace('Z', '+00:00'))
+    // Append Z if not present to treat as UTC
+    const isoStr = timeStr.includes('Z') || timeStr.includes('+') 
+      ? timeStr 
+      : timeStr + 'Z'
+    const date = new Date(isoStr)
     return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   }
 

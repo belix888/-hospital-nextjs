@@ -139,15 +139,28 @@ function DoctorCabinet() {
   }
 
   const formatTime = (timeStr: string) => {
-    const date = new Date(timeStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    if (!timeStr) return ''
+    const isoStr = timeStr.includes('Z') || timeStr.includes('+') 
+      ? timeStr 
+      : timeStr + 'Z'
+    const date = new Date(isoStr)
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   }
 
   const getEndTime = (apt: Appointment) => {
     const start = new Date(apt.appointmentTime)
-    const end = new Date(start.getTime() + (apt.durationMinutes || 60) * 60000)
-    return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    const duration = apt.durationMinutes || 60
+    const end = new Date(start.getTime() + duration * 60000)
+    return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   }
+
+  // Sync date with URL parameter from schedule
+  useEffect(() => {
+    const dateParam = searchParams.get('date')
+    if (dateParam) {
+      setSelectedDate(dateParam)
+    }
+  }, [searchParams])
 
   // Show loading while checking auth
   if (authLoading) {

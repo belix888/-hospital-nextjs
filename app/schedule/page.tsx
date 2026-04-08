@@ -129,9 +129,10 @@ export default function SchedulePage() {
 
   const formatTime = (dateStr: string) => {
     if (!dateStr) return ''
-    const date = dateStr.includes('Z') 
-      ? new Date(dateStr) 
-      : new Date(dateStr.replace('Z', '+00:00'))
+    const isoStr = dateStr.includes('Z') || dateStr.includes('+') 
+      ? dateStr 
+      : dateStr + 'Z'
+    const date = new Date(isoStr)
     return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   }
 
