@@ -11,11 +11,14 @@ export async function GET(request: Request) {
       return new Response('Missing startDate or endDate', { status: 400 })
     }
 
+    console.log('Exporting appointments from', startDate, 'to', endDate)
+    
     const appointments = await getAppointmentsByDateRange(startDate, endDate)
+    console.log('Found appointments:', appointments.length)
 
     // Create CSV content
     const headers = ['Дата', 'Время', 'Врач', 'Специализация', 'Пациент', 'Телефон', 'Кабинет', 'Статус', 'Заметки']
-    const rows = appointments.map(apt => [
+    const rows = appointments.map((apt: any) => [
       new Date(apt.appointmentDate).toLocaleDateString('ru'),
       new Date(apt.appointmentTime).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       apt.doctor_name || '',
@@ -38,11 +41,11 @@ export async function GET(request: Request) {
     return new Response(BOM + csvContent, {
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="записи_${startDate}_${endDate}.csv"`
+        'Content-Disposition': `attachment; filename="appointments_${startDate}_${endDate}.csv"`
       }
     })
   } catch (error: any) {
     console.error('Error exporting appointments:', error)
-    return new Response(error.message || 'Error exporting', { status: 500 })
+    return new Response('Error exporting: ' + error.message, { status: 500 })
   }
 }

@@ -19,20 +19,21 @@ export default function AdminExportPage() {
       const response = await fetch(`/api/appointments/export?startDate=${startDate}&endDate=${endDate}`)
       
       if (!response.ok) {
-        throw new Error('Ошибка экспорта')
+        const text = await response.text()
+        throw new Error(text || 'Ошибка экспорта')
       }
 
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `записи_${startDate}_${endDate}.csv`
+      a.download = `appointments_${startDate}_${endDate}.csv`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       a.remove()
-    } catch (error) {
-      alert('Ошибка экспорта')
+    } catch (error: any) {
+      alert('Ошибка экспорта: ' + error.message)
     } finally {
       setLoading(false)
     }
