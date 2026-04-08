@@ -24,7 +24,7 @@ export default async function HomePage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Система управления больницей</h1>
-        <p className="mt-2 text-gray-600">Добро пожаловать в систему управления записями</p>
+        <p className="mt-2 text-gray-600">Добро пожаловать в систему управления записями больницы</p>
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
