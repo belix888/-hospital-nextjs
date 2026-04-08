@@ -65,10 +65,14 @@ function DoctorCabinet() {
     if (!selectedAppointment) return
     
     try {
-      const res = await fetch(`/api/appointments?id=${selectedAppointment.id}`, {
-        method: 'PATCH',
+      const res = await fetch('/api/appointments/update', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'extend', durationMinutes: extendMinutes })
+        body: JSON.stringify({ 
+          id: selectedAppointment.id,
+          action: 'extend', 
+          durationMinutes: extendMinutes 
+        })
       })
 
       if (res.ok) {
@@ -88,10 +92,13 @@ function DoctorCabinet() {
     if (!confirm('Завершить прием пациента?')) return
     
     try {
-      const res = await fetch(`/api/appointments?id=${appointment.id}`, {
-        method: 'PATCH',
+      const res = await fetch('/api/appointments/update', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'complete' })
+        body: JSON.stringify({ 
+          id: appointment.id,
+          action: 'complete' 
+        })
       })
 
       if (res.ok) {
@@ -110,10 +117,13 @@ function DoctorCabinet() {
     if (!confirm('Отменить запись?')) return
     
     try {
-      const res = await fetch(`/api/appointments?id=${appointment.id}`, {
-        method: 'PATCH',
+      const res = await fetch('/api/appointments/update', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel' })
+        body: JSON.stringify({ 
+          id: appointment.id,
+          action: 'cancel' 
+        })
       })
 
       if (res.ok) {
