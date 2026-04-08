@@ -87,19 +87,23 @@ export default function NewAppointmentPage() {
     }
 
     try {
-      // Ensure date and time are in correct format
-      // formData.date should be like "2026-04-08"
-      // formData.time should be like "22:20"
-      let datePart = formData.date
-      if (datePart.includes('T')) {
-        datePart = datePart.split('T')[0]
-      }
+      // Debug: check what we're getting
+      console.log('formData.date:', formData.date)
+      console.log('formData.time:', formData.time)
       
-      let timePart = formData.time
-      if (timePart.includes('T')) {
-        timePart = timePart.split('T')[1]
-      }
-      timePart = timePart.replace(':00', '')
+      // Extract date part - take first 10 characters (YYYY-MM-DD)
+      // or split by T if the value contains T
+      const dateClean = formData.date.includes('T') 
+        ? formData.date.split('T')[0] 
+        : formData.date.substring(0, 10)
+      
+      // Extract time part - take first 5 characters (HH:MM)
+      const timeClean = formData.time.includes('T')
+        ? formData.time.split('T')[1].substring(0, 5)
+        : formData.time.substring(0, 5)
+      
+      console.log('Clean date:', dateClean, 'Clean time:', timeClean)
+      console.log('Full timestamp:', `${dateClean}T${timeClean}:00`)
       
       const res = await fetch('/api/appointments', {
         method: 'POST',
@@ -108,8 +112,8 @@ export default function NewAppointmentPage() {
           doctorId: formData.doctorId,
           patientId: finalPatientId,
           roomId: formData.roomId,
-          appointmentDate: datePart,
-          appointmentTime: `${datePart}T${timePart}:00`,
+          appointmentDate: dateClean,
+          appointmentTime: `${dateClean}T${timeClean}:00`,
           durationMinutes: formData.durationMinutes,
           notes: formData.notes
         })
