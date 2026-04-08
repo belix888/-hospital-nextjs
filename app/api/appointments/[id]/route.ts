@@ -1,6 +1,8 @@
 import { initDatabase, supabase } from '@/lib/db'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function PATCH(request: Request) {
   try {
     await initDatabase()
@@ -73,6 +75,8 @@ export async function PATCH(request: Request) {
 
     if (action === 'complete') {
       // Mark as completed
+      console.log('Completing appointment:', id)
+      
       const { data: updated, error: updateError } = await supabase
         .from('Appointment')
         .update({ status: 'completed' })
@@ -80,7 +84,10 @@ export async function PATCH(request: Request) {
         .select('*, Doctor:doctorId(name, specialization), Patient:patientId(name, phone), Room:roomId(name)')
         .single()
 
-      if (updateError) throw updateError
+      if (updateError) {
+        console.error('Complete error:', updateError)
+        throw updateError
+      }
 
       return NextResponse.json({
         ...updated,
