@@ -23,7 +23,8 @@ export async function POST(request: Request) {
 
     const doctor = await createDoctor({ name, specialization, phone, email })
     return Response.json(doctor)
-  } catch (error) {
-    return Response.json({ error: 'Failed to create doctor' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Error creating doctor:', error)
+    return Response.json({ error: error.message || 'Failed to create doctor' }, { status: 500 })
   }
 }

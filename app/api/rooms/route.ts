@@ -23,7 +23,8 @@ export async function POST(request: Request) {
 
     const room = await createRoom({ name, isAvailable })
     return Response.json(room)
-  } catch (error) {
-    return Response.json({ error: 'Failed to create room' }, { status: 500 })
+  } catch (error: any) {
+    console.error('Error creating room:', error)
+    return Response.json({ error: error.message || 'Failed to create room' }, { status: 500 })
   }
 }

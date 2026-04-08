@@ -4,11 +4,17 @@ const globalForPool = globalThis as unknown as {
   pool: Pool | undefined
 }
 
+const connectionString = process.env.DATABASE_URL
+
+if (!connectionString) {
+  console.error('DATABASE_URL is not set!')
+}
+
 export const pool = globalForPool.pool ?? new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
+  connectionString: connectionString,
+  ssl: connectionString ? {
     rejectUnauthorized: false
-  }
+  } : false
 })
 
 if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool
