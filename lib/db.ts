@@ -199,9 +199,8 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
       patient_phone: item.Patient?.phone,
       room_name: item.Room?.name,
       endTime: endTime.toISOString()
-    }
+    })
   })
-}
 }
 
 export async function getAppointmentsByDateRange(startDate: string, endDate: string) {
