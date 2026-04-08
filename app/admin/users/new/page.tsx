@@ -108,7 +108,15 @@ export default function NewUserPage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Врач (связь с профилем врача)</label>
             <select
               value={formData.doctorId}
-              onChange={e => setFormData({ ...formData, doctorId: e.target.value })}
+              onChange={e => {
+                const selectedDoctor = doctors.find(d => d.id === e.target.value)
+                setFormData({ 
+                  ...formData, 
+                  doctorId: e.target.value,
+                  name: selectedDoctor?.name || formData.name,
+                  email: selectedDoctor?.email || formData.email
+                })
+              }}
               className="w-full px-3 py-2 border rounded-md"
             >
               <option value="">Выберите врача</option>
@@ -117,7 +125,7 @@ export default function NewUserPage() {
               ))}
             </select>
             <p className="text-sm text-gray-500 mt-1">
-              Привяжите учетную запись к профилю врача для автоматического подставления при создании записей
+              При выборе врача его ФИО и почта подставятся автоматически
             </p>
           </div>
         )}

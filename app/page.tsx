@@ -83,13 +83,16 @@ export default async function HomePage() {
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Информация</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>• Система работает 24/7</li>
-            <li>• Записи обновляются в реальном времени</li>
-            <li>• Доступ к админке через /admin</li>
-            <li>• База данных: PostgreSQL (Supabase)</li>
-          </ul>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Вход для врачей</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Войдите в систему для создания записей пациентов и просмотра расписания
+          </p>
+          <Link
+            href="/login"
+            className="block w-full text-center px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-md"
+          >
+            🔐 Вход для врачей
+          </Link>
         </div>
       </div>
     </div>
