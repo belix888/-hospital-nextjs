@@ -1,4 +1,4 @@
-import { initDatabase, pool } from '@/lib/db'
+import { initDatabase, supabase } from '@/lib/db'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -13,16 +13,19 @@ export async function POST(request: Request) {
     }
 
     // Check if user exists
-    const result = await pool.query(
-      'SELECT * FROM "User" WHERE email = $1',
-      [email]
-    )
+    const { data: users, error } = await supabase
+      .from('User')
+      .select('*')
+      .eq('email', email)
+      .limit(1)
 
-    if (result.rows.length === 0) {
+    if (error) throw error
+
+    if (!users || users.length === 0) {
       return NextResponse.json({ error: 'Неверный email или пароль' }, { status: 401 })
     }
 
-    const user = result.rows[0]
+    const user = users[0]
 
     // Simple password check (in production use bcrypt)
     if (user.password !== password) {
@@ -36,8 +39,8 @@ export async function POST(request: Request) {
       name: user.name,
       role: user.role
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error)
-    return NextResponse.json({ error: 'Ошибка входа' }, { status: 500 })
+    return NextResponse.json({ error: error.message || 'Ошибка входа' }, { status: 500 })
   }
 }
