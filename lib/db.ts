@@ -4,17 +4,17 @@ const globalForPool = globalThis as unknown as {
   pool: Pool | undefined
 }
 
-const connectionString = process.env.DATABASE_URL
+const connectionString = process.env.DATABASE_URL || 'postgresql://postgres:B8nvmDackErJTNgJ@db.ezltbmyhpmnbfeboexlz.supabase.co:5432/postgres'
 
-if (!connectionString) {
-  console.error('DATABASE_URL is not set!')
+if (!process.env.DATABASE_URL) {
+  console.warn('DATABASE_URL not set, using fallback')
 }
 
 export const pool = globalForPool.pool ?? new Pool({
   connectionString: connectionString,
-  ssl: connectionString ? {
+  ssl: {
     rejectUnauthorized: false
-  } : false
+  }
 })
 
 if (process.env.NODE_ENV !== 'production') globalForPool.pool = pool
