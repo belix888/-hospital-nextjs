@@ -129,6 +129,19 @@ export default function SchedulePage() {
 
   const formatTime = (dateStr: string) => {
     if (!dateStr) return ''
+    // Если строка содержит только время (HH:MM), выводим как есть
+    if (dateStr.match(/^\d{2}:\d{2}(:\d{2})?$/)) {
+      return dateStr.substring(0, 5)
+    }
+    // Если это ISO строка с датой и временем (содержит 'T'), извлекаем время напрямую
+    if (dateStr.includes('T')) {
+      const timePart = dateStr.split('T')[1]
+      if (timePart) {
+        // timePart имеет формат HH:MM:SS.mmmZ или HH:MM:SSZ
+        return timePart.substring(0, 5)
+      }
+    }
+    // Иначе пробуем парсить как дату
     const date = new Date(dateStr)
     return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }

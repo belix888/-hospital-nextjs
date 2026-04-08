@@ -148,6 +148,10 @@ function DoctorCabinet() {
     const start = new Date(apt.appointmentTime)
     const duration = apt.durationMinutes || 60
     const end = new Date(start.getTime() + duration * 60000)
+    // Извлекаем время напрямую из ISO строки
+    if (end.toISOString) {
+      return end.toISOString().split('T')[1]?.substring(0, 5) || end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    }
     return end.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
   }
 

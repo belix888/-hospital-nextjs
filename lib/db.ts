@@ -184,22 +184,21 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
   
   const { data, error } = await query.order('appointmentDate').order('appointmentTime')
   
-  // Flatten the data and calculate end time - use stored value or default 60
-  return (data || []).map(item => {
-    const startTime = new Date(item.appointmentTime)
-    // Use stored duration or default to 60
-    let duration = parseInt(String(item.durationMinutes), 10) || 60
-    const endTime = new Date(startTime.getTime() + duration * 60 * 1000)
+  if (error) throw error
+  
+  return (data || []).map(function(item: any) {
+    var startTime = new Date(item.appointmentTime)
+    var duration = parseInt(String(item.durationMinutes), 10) || 60
+    var endTime = new Date(startTime.getTime() + duration * 60 * 1000)
     return {
-      ...item,
       durationMinutes: duration,
-      doctor_name: item.Doctor?.name,
-      doctor_specialization: item.Doctor?.specialization,
-      patient_name: item.Patient?.name,
-      patient_phone: item.Patient?.phone,
-      room_name: item.Room?.name,
+      doctor_name: item.Doctor ? item.Doctor.name : null,
+      doctor_specialization: item.Doctor ? item.Doctor.specialization : null,
+      patient_name: item.Patient ? item.Patient.name : null,
+      patient_phone: item.Patient ? item.Patient.phone : null,
+      room_name: item.Room ? item.Room.name : null,
       endTime: endTime.toISOString()
-    })
+    }
   })
 }
 
@@ -218,21 +217,18 @@ export async function getAppointmentsByDateRange(startDate: string, endDate: str
     .order('appointmentTime')
   
   if (error) throw error
-   
-  // Flatten the data and calculate end time - use stored value or default 60
-  return (data || []).map(item => {
-    const startTime = new Date(item.appointmentTime)
-    // Use stored duration or default to 60
-    let duration = parseInt(String(item.durationMinutes), 10) || 60
-    const endTime = new Date(startTime.getTime() + duration * 60 * 1000)
+    
+  return (data || []).map(function(item: any) {
+    var startTime = new Date(item.appointmentTime)
+    var duration = parseInt(String(item.durationMinutes), 10) || 60
+    var endTime = new Date(startTime.getTime() + duration * 60 * 1000)
     return {
-      ...item,
       durationMinutes: duration,
-      doctor_name: item.Doctor?.name,
-      doctor_specialization: item.Doctor?.specialization,
-      patient_name: item.Patient?.name,
-      patient_phone: item.Patient?.phone,
-      room_name: item.Room?.name,
+      doctor_name: item.Doctor ? item.Doctor.name : null,
+      doctor_specialization: item.Doctor ? item.Doctor.specialization : null,
+      patient_name: item.Patient ? item.Patient.name : null,
+      patient_phone: item.Patient ? item.Patient.phone : null,
+      room_name: item.Room ? item.Room.name : null,
       endTime: endTime.toISOString()
     }
   })
