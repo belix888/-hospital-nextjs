@@ -8,6 +8,7 @@ interface Appointment {
   id: string
   appointmentDate: string
   appointmentTime: string
+  endTime?: string
   status: string
   doctor_name: string
   doctor_specialization: string
