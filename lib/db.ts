@@ -57,6 +57,33 @@ export async function createDoctor(data: { name: string; specialization: string;
   return result
 }
 
+export async function updateDoctor(data: { id: string; name: string; specialization: string; phone?: string; email?: string; isActive: boolean }) {
+  const { data: result, error } = await supabase
+    .from('Doctor')
+    .update({
+      name: data.name,
+      specialization: data.specialization,
+      phone: data.phone || null,
+      email: data.email || null,
+      isActive: data.isActive
+    })
+    .eq('id', data.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
+}
+
+export async function deleteDoctor(id: string) {
+  const { error } = await supabase
+    .from('Doctor')
+    .delete()
+    .eq('id', id)
+  
+  if (error) throw error
+}
+
 // Patients
 export async function getPatients() {
   const { data, error } = await supabase
@@ -108,6 +135,31 @@ export async function createRoom(data: { name: string; isAvailable?: boolean }) 
   
   if (error) throw error
   return result
+}
+
+export async function updateRoom(data: { id: string; name: string; isAvailable: boolean }) {
+  const { data: result, error } = await supabase
+    .from('Room')
+    .update({
+      name: data.name,
+      isAvailable: data.isAvailable
+    })
+    .eq('id', data.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
+}
+
+export async function deleteRoom(id: string) {
+  // Soft delete
+  const { error } = await supabase
+    .from('Room')
+    .update({ isDeleted: true, deletedAt: new Date().toISOString() })
+    .eq('id', id)
+  
+  if (error) throw error
 }
 
 // Appointments
@@ -249,4 +301,29 @@ export async function createUser(data: { email: string; password: string; name?:
   
   if (error) throw error
   return result
+}
+
+export async function updateUser(data: { id: string; email: string; name?: string; role?: string }) {
+  const { data: result, error } = await supabase
+    .from('User')
+    .update({
+      email: data.email,
+      name: data.name || null,
+      role: data.role || 'user'
+    })
+    .eq('id', data.id)
+    .select()
+    .single()
+  
+  if (error) throw error
+  return result
+}
+
+export async function deleteUser(id: string) {
+  const { error } = await supabase
+    .from('User')
+    .delete()
+    .eq('id', id)
+  
+  if (error) throw error
 }

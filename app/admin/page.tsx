@@ -59,6 +59,9 @@ export default async function AdminPage() {
             <Link href="/admin/appointments" className="block py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 border-2 border-blue-200">
               📅 Все записи
             </Link>
+            <Link href="/admin/export" className="block py-3 px-4 bg-orange-50 text-orange-700 font-semibold rounded-lg hover:bg-orange-100 border-2 border-orange-200">
+              📊 Экспорт в Excel
+            </Link>
           </div>
         </div>
 

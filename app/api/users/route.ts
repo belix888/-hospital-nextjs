@@ -1,4 +1,4 @@
-import { createUser, initDatabase, supabase } from '@/lib/db'
+import { createUser, updateUser, deleteUser, initDatabase, supabase } from '@/lib/db'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -33,5 +33,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 })
     }
     return NextResponse.json({ error: error.message || 'Ошибка создания пользователя' }, { status: 500 })
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    await initDatabase()
+    const body = await request.json()
+    const { id, email, name, role } = body
+
+    if (!id || !email) {
+      return NextResponse.json({ error: 'ID и email обязательны' }, { status: 400 })
+    }
+
+    const user = await updateUser({ id, email, name, role })
+    return NextResponse.json(user)
+  } catch (error: any) {
+    if (error.code === '23505') {
+      return NextResponse.json({ error: 'Пользователь с таким email уже существует' }, { status: 400 })
+    }
+    return NextResponse.json({ error: error.message || 'Ошибка обновления пользователя' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    await initDatabase()
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID обязателен' }, { status: 400 })
+    }
+
+    await deleteUser(id)
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Ошибка удаления пользователя' }, { status: 500 })
   }
 }
