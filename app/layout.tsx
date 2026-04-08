@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth'
 import AuthNavigation from '@/components/AuthNavigation'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,39 +20,59 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-gray-50 dark:bg-gray-900`}>
         <AuthProvider>
-          <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm">
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {/* Navigation */}
+            <nav className="bg-white dark:bg-gray-800 shadow-sm">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
+                  {/* Logo */}
                   <div className="flex">
                     <div className="flex-shrink-0 flex items-center">
-                      <span className="text-xl font-bold text-blue-600">🏥 Больница</span>
+                      <Link href="/" className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        🏥 Больница
+                      </Link>
                     </div>
-                    <div className="ml-6 flex space-x-4">
-                      <a href="/" className="text-gray-900 px-4 py-2 rounded-lg text-base font-semibold hover:bg-blue-100">
+                    
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:ml-6 md:flex md:space-x-2">
+                      <Link href="/" className="text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 dark:hover:bg-gray-700">
                         Главная
-                      </a>
-                      <a href="/doctors" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
+                      </Link>
+                      <Link href="/doctors" className="text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-gray-700">
                         Врачи
-                      </a>
-                      <a href="/appointments/new" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
+                      </Link>
+                      <Link href="/appointments/new" className="text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-gray-700">
                         Записи
-                      </a>
-                      <a href="/schedule" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
+                      </Link>
+                      <Link href="/schedule" className="text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-gray-700">
                         Календарь
-                      </a>
-                      <a href="/doctor" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
-                        Кабинет врача
-                      </a>
+                      </Link>
+                      <Link href="/doctor" className="text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 dark:hover:bg-gray-700">
+                        Кабинет
+                      </Link>
                     </div>
                   </div>
-                  <AuthNavigation />
+
+                  {/* Right side: Theme toggle + Auth */}
+                  <div className="flex items-center gap-2">
+                    <ThemeToggle />
+                    <div className="hidden md:block">
+                      <AuthNavigation />
+                    </div>
+                    
+                    {/* Mobile menu button */}
+                    <div className="md:hidden flex items-center">
+                      <AuthNavigation mobile />
+                    </div>
+                  </div>
                 </div>
               </div>
             </nav>
-            <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            
+            {/* Main content */}
+            <main className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
               {children}
             </main>
           </div>

@@ -31,11 +31,21 @@ interface DayInfo {
 
 export default function SchedulePage() {
   const { user, loading: authLoading } = useAuth()
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return new Date()
+    }
+    return new Date(2024, 0, 1) // Default for SSR
+  })
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<DayInfo | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Check if user can create appointments (must be logged in as doctor)
   const canCreateAppointments = user?.role === 'doctor' && user?.doctorId
@@ -184,10 +194,28 @@ export default function SchedulePage() {
 
   const days = getDaysInMonth(currentDate)
 
+  // Prevent hydration mismatch - show loading until mounted
+  if (!mounted) {
+    return (
+      <div className="px-4 py-6 sm:px-0">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mx-auto mb-4"></div>
+            <div className="grid grid-cols-7 gap-2">
+              {[...Array(42)].map((_, i) => (
+                <div key={i} className="h-20 bg-gray-100 dark:bg-gray-700 rounded-lg"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="px-4 py-6 sm:px-0">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Календарь записей</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Календарь записей</h1>
         {canCreateAppointments && user?.doctorId ? (
           <Link
             href={`/appointments/new?doctorId=${user.doctorId}`}
@@ -205,30 +233,30 @@ export default function SchedulePage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 sm:p-6">
         {/* Calendar Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 sm:mb-6">
           <button
             onClick={prevMonth}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow"
+            className="px-3 sm:px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow text-sm"
           >
-            ← Предыдущий
+            ← Пред
           </button>
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
           <button
             onClick={nextMonth}
-            className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow"
+            className="px-3 sm:px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow text-sm"
           >
-            Следующий →
+            След →
           </button>
         </div>
 
         {/* Days of Week */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
           {daysOfWeek.map(day => (
-            <div key={day} className="text-center font-semibold text-gray-600 py-2 bg-gray-100 rounded-lg">
+            <div key={day} className="text-center font-semibold text-gray-600 dark:text-gray-400 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs sm:text-sm">
               {day}
             </div>
           ))}
@@ -236,33 +264,33 @@ export default function SchedulePage() {
 
         {/* Calendar Grid */}
         {loading ? (
-          <div className="text-center py-12">Загрузка календаря...</div>
+          <div className="text-center py-8 sm:py-12 text-gray-500 dark:text-gray-400">Загрузка календаря...</div>
         ) : (
-          <div className="grid grid-cols-7 gap-2">
+          <div className="grid grid-cols-7 gap-1 sm:gap-2">
             {days.map((day, index) => (
               <button
                 key={index}
                 onClick={() => handleDayClick(day)}
                 disabled={!day.hasAppointments}
                 className={`
-                  min-h-[80px] p-2 rounded-lg border-2 transition-all
+                  min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 rounded-lg border-2 transition-all text-xs
                   ${day.isCurrentMonth ? '' : 'opacity-40'}
-                  ${day.isToday ? 'ring-4 ring-blue-400' : ''}
+                  ${day.isToday ? 'ring-2 sm:ring-4 ring-blue-400' : ''}
                   ${day.hasAppointments 
-                    ? 'bg-red-100 border-red-300 hover:bg-red-200 cursor-pointer' 
-                    : 'bg-green-100 border-green-300 hover:bg-green-200 cursor-default'}
+                    ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 hover:bg-red-200 cursor-pointer' 
+                    : 'bg-green-100 dark:bg-green-900 border-green-300 dark:border-green-700 hover:bg-green-200 cursor-default'}
                 `}
               >
-                <div className="text-sm font-bold text-gray-800">
+                <div className="text-sm font-bold text-gray-800 dark:text-gray-200">
                   {new Date(day.date).getDate()}
                 </div>
                 {day.hasAppointments && (
-                  <div className="text-xs text-red-700 font-semibold mt-1">
-                    {day.appointmentCount} запись{day.appointmentCount > 1 ? 'ей' : ''}
+                  <div className="text-xs text-red-700 dark:text-red-400 font-semibold mt-0.5 sm:mt-1">
+                    {day.appointmentCount}
                   </div>
                 )}
                 {!day.hasAppointments && day.isCurrentMonth && (
-                  <div className="text-xs text-green-700 font-semibold mt-1">
+                  <div className="text-xs text-green-700 dark:text-green-400 font-semibold mt-0.5 sm:mt-1">
                     Свободно
                   </div>
                 )}
@@ -273,29 +301,29 @@ export default function SchedulePage() {
       </div>
 
       {/* Legend */}
-      <div className="mt-6 flex gap-6 justify-center">
+      <div className="mt-4 sm:mt-6 flex gap-4 sm:gap-6 justify-center flex-wrap">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-green-100 border-2 border-green-300 rounded"></div>
-          <span className="text-gray-700 font-medium">Свободный день</span>
+          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-100 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 rounded"></div>
+          <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">Свободный</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-red-100 border-2 border-red-300 rounded"></div>
-          <span className="text-gray-700 font-medium">Есть записи (нажмите для деталей)</span>
+          <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-100 dark:bg-red-900 border-2 border-red-300 dark:border-red-700 rounded"></div>
+          <span className="text-gray-700 dark:text-gray-300 font-medium text-sm">Есть записи</span>
         </div>
       </div>
 
       {/* Modal */}
       {showModal && selectedDay && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                   Записи на {formatDate(selectedDay.date)}
                 </h3>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl font-bold"
                 >
                   ×
                 </button>
@@ -303,45 +331,45 @@ export default function SchedulePage() {
               
               <div className="space-y-4">
                 {selectedDay.appointments.map(apt => (
-                  <div key={apt.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                    <div className="flex justify-between items-start mb-2">
+                  <div key={apt.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-2">
                       <div>
-                        <span className="text-lg font-bold text-blue-700">
+                        <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
                           {formatTime(apt.appointmentTime)}
                         </span>
                         {apt.endTime && (
-                          <span className="text-gray-500 ml-2">
+                          <span className="text-gray-500 dark:text-gray-400 ml-2">
                              - {formatTime(apt.endTime)}
                           </span>
                         )}
                       </div>
                       <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                        apt.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                        apt.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
+                        apt.status === 'scheduled' ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200' :
+                        apt.status === 'completed' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200' :
+                        'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                       }`}>
                         {apt.status === 'scheduled' ? 'Запланировано' : 
                          apt.status === 'completed' ? 'Завершено' : 'Отменено'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-gray-500">Врач:</span>
-                        <span className="font-semibold text-gray-800 ml-1">{apt.doctor_name}</span>
-                        <span className="text-gray-500 text-xs ml-1">({apt.doctor_specialization})</span>
+                        <span className="text-gray-500 dark:text-gray-400">Врач:</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200 ml-1">{apt.doctor_name}</span>
+                        <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">({apt.doctor_specialization})</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Кабинет:</span>
-                        <span className="font-semibold text-gray-800 ml-1">{apt.room_name}</span>
+                        <span className="text-gray-500 dark:text-gray-400">Кабинет:</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200 ml-1">{apt.room_name}</span>
                       </div>
                       {user ? (
-                        <div className="col-span-2">
-                          <span className="text-gray-500">Пациент:</span>
-                          <span className="font-semibold text-gray-800 ml-1">{apt.patient_name}</span>
-                          <span className="text-gray-500 text-xs ml-1">{apt.patient_phone}</span>
+                        <div className="col-span-1 sm:col-span-2">
+                          <span className="text-gray-500 dark:text-gray-400">Пациент:</span>
+                          <span className="font-semibold text-gray-800 dark:text-gray-200 ml-1">{apt.patient_name}</span>
+                          <span className="text-gray-500 dark:text-gray-400 text-xs ml-1">{apt.patient_phone}</span>
                         </div>
                       ) : (
-                        <div className="col-span-2 text-gray-400 text-sm italic">
+                        <div className="col-span-1 sm:col-span-2 text-gray-400 dark:text-gray-500 text-sm italic">
                           Войдите для просмотра деталей пациента
                         </div>
                       )}

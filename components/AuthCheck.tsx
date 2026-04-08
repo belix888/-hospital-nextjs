@@ -17,8 +17,15 @@ export function AuthCheck() {
   const { user, loading } = useAuth()
   const [todayAppointments, setTodayAppointments] = useState<AppointmentInfo[]>([])
   const [appointmentsLoading, setAppointmentsLoading] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+    
     if (user?.role === 'doctor' && user?.doctorId) {
       // Doctor sees their own appointments
       setAppointmentsLoading(true)
@@ -42,7 +49,7 @@ export function AuthCheck() {
         })
         .catch(() => setAppointmentsLoading(false))
     }
-  }, [user])
+  }, [user, mounted])
 
   const formatTime = (timeStr: string | null | undefined) => {
     if (!timeStr) return ''
@@ -54,11 +61,12 @@ export function AuthCheck() {
     }
   }
 
-  if (loading) {
+  // Prevent hydration mismatch
+  if (!mounted || loading) {
     return (
       <div className="space-y-3">
         <div className="animate-pulse">
-          <div className="h-16 bg-gray-200 rounded-lg"></div>
+          <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
         </div>
       </div>
     )
@@ -99,30 +107,30 @@ export function AuthCheck() {
   if (user && (user.role === 'admin' || user.role === 'doctor')) {
     return (
       <div className="space-y-3">
-        <h4 className="font-semibold text-gray-800 border-b pb-2">Сегодня в больнице:</h4>
+        <h4 className="font-semibold text-gray-800 dark:text-gray-200 border-b pb-2">Сегодня в больнице:</h4>
         
         {appointmentsLoading ? (
-          <p className="text-gray-500 text-sm">Загрузка...</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Загрузка...</p>
         ) : todayAppointments.length > 0 ? (
           <div className="space-y-2">
             {todayAppointments.map(apt => (
-              <div key={apt.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
-                <div className="font-semibold text-gray-800">
+              <div key={apt.id} className="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-sm">
+                <div className="font-semibold text-gray-800 dark:text-gray-200">
                   {apt.doctor_name} ({apt.doctor_specialization})
                 </div>
-                <div className="text-gray-600">
-                  📍 {apt.room_name} • 🕐 {apt.appointmentTime} - {apt.endTime}
+                <div className="text-gray-600 dark:text-gray-400">
+                  📍 {apt.room_name} • 🕐 {formatTime(apt.appointmentTime)} - {formatTime(apt.endTime)}
                 </div>
               </div>
             ))}
             {todayAppointments.length >= 5 && (
-              <Link href="/schedule" className="block text-center text-sm text-blue-600 hover:underline">
+              <Link href="/schedule" className="block text-center text-sm text-blue-600 dark:text-blue-400 hover:underline">
                 Показать все записи →
               </Link>
             )}
           </div>
         ) : (
-          <p className="text-gray-500 text-sm">На сегодня записей нет</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">На сегодня записей нет</p>
         )}
         
         <Link
@@ -138,11 +146,11 @@ export function AuthCheck() {
   // Guest view
   return (
     <div className="space-y-3">
-      <div className="block w-full text-center px-6 py-4 bg-gray-300 text-gray-600 font-semibold rounded-lg cursor-not-allowed">
+      <div className="block w-full text-center px-6 py-4 bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-lg cursor-not-allowed">
         ➕ Создать новую запись
       </div>
-      <p className="text-xs text-gray-500 text-center">
-        Только для врачей. <Link href="/login" className="text-blue-600 hover:underline">Войти</Link>
+      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+        Только для врачей. <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Войти</Link>
       </p>
       <Link
         href="/doctors"

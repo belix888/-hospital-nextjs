@@ -6,6 +6,18 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --primary: 59, 130, 246;
+  --secondary: 107, 114, 128;
+  --success: 34, 197, 94;
+  --danger: 239, 68, 68;
+  --warning: 245, 158, 11;
+}
+
+/* Dark theme variables */
+.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 17, 24, 39;
+  --background-end-rgb: 31, 41, 55;
 }
 
 body {
@@ -18,17 +30,16 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-/* Input fields - dark text for readability */
+/* Light theme inputs */
 input, select, textarea {
-  color: #1f2937 !important;
-  background-color: white !important;
+  color: #1f2937;
+  background-color: #ffffff;
 }
 
 input::placeholder, textarea::placeholder {
-  color: #9ca3af !important;
+  color: #9ca3af;
 }
 
-/* Make inputs more visible */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -38,14 +49,104 @@ input[type="time"],
 input[type="number"],
 select,
 textarea {
-  color: #111827 !important;
-  background-color: #ffffff !important;
-  border-color: #d1d5db !important;
+  color: #111827;
+  background-color: #ffffff;
+  border-color: #d1d5db;
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Dark theme inputs */
+.dark input,
+.dark select,
+.dark textarea {
+  color: #f9fafb;
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9ca3af;
+}
+
+.dark input[type="text"],
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="tel"],
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="number"],
+.dark select,
+.dark textarea {
+  color: #f9fafb;
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+/* Dark theme backgrounds for containers */
+.dark .bg-white {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+
+.dark .bg-gray-200 {
+  background-color: #374151 !important;
+}
+
+/* Dark theme text colors */
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700,
+.dark .text-gray-600 {
+  color: #f9fafb !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400 {
+  color: #d1d5db !important;
+}
+
+/* Dark theme borders */
+.dark .border-gray-200,
+.dark .border-gray-300 {
+  border-color: #374151 !important;
+}
+
+/* Dark theme scrollbar */
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 @layer utilities {
