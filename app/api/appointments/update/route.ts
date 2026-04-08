@@ -63,13 +63,19 @@ export async function POST(request: Request) {
 
       if (updateError) throw updateError
 
+      // Calculate end time
+      const startTime = new Date(updated.appointmentTime)
+      const endTime = new Date(startTime.getTime() + (newDuration || 60) * 60000)
+
       return NextResponse.json({
         ...updated,
+        durationMinutes: newDuration,
         doctor_name: updated.Doctor?.name,
         doctor_specialization: updated.Doctor?.specialization,
         patient_name: updated.Patient?.name,
         patient_phone: updated.Patient?.phone,
-        room_name: updated.Room?.name
+        room_name: updated.Room?.name,
+        endTime: endTime.toISOString()
       })
     }
 
