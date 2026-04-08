@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@/lib/auth'
 
 interface Appointment {
   id: string
@@ -25,11 +26,15 @@ interface DayInfo {
 }
 
 export default function SchedulePage() {
+  const { user, loading: authLoading } = useAuth()
   const [currentDate, setCurrentDate] = useState(new Date())
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDay, setSelectedDay] = useState<DayInfo | null>(null)
   const [showModal, setShowModal] = useState(false)
+
+  // Check if user can create appointments (must be logged in as doctor)
+  const canCreateAppointments = user?.role === 'doctor' && user?.doctorId
 
   useEffect(() => {
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
@@ -153,12 +158,21 @@ export default function SchedulePage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Календарь записей</h1>
-        <Link
-          href="/appointments/new"
-          className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow-md"
-        >
-          + Новая запись
-        </Link>
+        {canCreateAppointments ? (
+          <Link
+            href={`/appointments/new?doctorId=${user.doctorId}`}
+            className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow-md"
+          >
+            + Новая запись
+          </Link>
+        ) : authLoading ? null : (
+          <div className="text-sm text-gray-500">
+            <Link href="/login" className="text-blue-600 hover:underline">
+              Войдите как врач
+            </Link>
+            {' '} для создания записей
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6">
@@ -285,11 +299,17 @@ export default function SchedulePage() {
                         <span className="text-gray-500">Кабинет:</span>
                         <span className="font-semibold text-gray-800 ml-1">{apt.room_name}</span>
                       </div>
-                      <div className="col-span-2">
-                        <span className="text-gray-500">Пациент:</span>
-                        <span className="font-semibold text-gray-800 ml-1">{apt.patient_name}</span>
-                        <span className="text-gray-500 text-xs ml-1">{apt.patient_phone}</span>
-                      </div>
+                      {user ? (
+                        <div className="col-span-2">
+                          <span className="text-gray-500">Пациент:</span>
+                          <span className="font-semibold text-gray-800 ml-1">{apt.patient_name}</span>
+                          <span className="text-gray-500 text-xs ml-1">{apt.patient_phone}</span>
+                        </div>
+                      ) : (
+                        <div className="col-span-2 text-gray-400 text-sm italic">
+                          Войдите для просмотра деталей пациента
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

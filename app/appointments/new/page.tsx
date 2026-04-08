@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '@/lib/auth'
 
 interface Doctor {
   id: string
@@ -24,6 +25,7 @@ interface Room {
 function NewAppointmentForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user, loading: authLoading } = useAuth()
   const [loading, setLoading] = useState(false)
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
@@ -31,6 +33,26 @@ function NewAppointmentForm() {
   
   // Get doctorId from URL query parameter (passed after login)
   const presetDoctorId = searchParams.get('doctorId')
+  
+  // Check if user is authorized (must be logged in as doctor)
+  const isAuthorized = user?.role === 'doctor' && user?.doctorId
+  
+  // Redirect if not authorized (but wait for auth to load)
+  useEffect(() => {
+    if (!authLoading && !isAuthorized) {
+      router.push('/login?redirect=/appointments/new')
+    }
+  }, [authLoading, isAuthorized, router])
+
+  if (authLoading || !isAuthorized) {
+    return (
+      <div className="px-4 py-6 sm:px-0 max-w-2xl mx-auto">
+        <div className="bg-white shadow-lg rounded-xl p-8 text-center">
+          <p className="text-gray-600">Проверка авторизации...</p>
+        </div>
+      </div>
+    )
+  }
   
   const [formData, setFormData] = useState({
     doctorId: presetDoctorId || '',

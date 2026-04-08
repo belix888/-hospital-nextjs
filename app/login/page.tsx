@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get('redirect') || ''
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -27,7 +29,8 @@ export default function LoginPage() {
         
         // If user is a doctor with doctorId, redirect to create appointment with doctor pre-selected
         if (data.role === 'doctor' && data.doctorId) {
-          router.push(`/appointments/new?doctorId=${data.doctorId}`)
+          const targetUrl = redirect || `/appointments/new?doctorId=${data.doctorId}`
+          router.push(targetUrl)
         } 
         // If user is admin, redirect to admin dashboard
         else if (data.role === 'admin') {
@@ -85,5 +88,21 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+import { Suspense } from 'react'
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+          <p className="text-center text-gray-500">Загрузка...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }

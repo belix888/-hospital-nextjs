@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getStats, initDatabase } from '@/lib/db'
+import { AuthCheck } from '@/components/AuthCheck'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,26 +61,7 @@ export default async function HomePage() {
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="bg-white shadow rounded-lg p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Быстрые действия</h3>
-          <div className="space-y-3">
-            <Link
-              href="/appointments/new"
-              className="block w-full text-center px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow-md"
-            >
-              ➕ Создать новую запись
-            </Link>
-            <Link
-              href="/doctors"
-              className="block w-full text-center px-6 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow-md"
-            >
-              👨‍⚕️ Список врачей
-            </Link>
-            <Link
-              href="/schedule"
-              className="block w-full text-center px-6 py-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 shadow-md"
-            >
-              📅 Календарь записей
-            </Link>
-          </div>
+          <AuthCheck />
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
