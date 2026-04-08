@@ -36,43 +36,43 @@ export default async function AdminPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Управление</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Управление</h2>
           <div className="space-y-3">
-            <Link href="/admin/doctors" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
+            <Link href="/admin/doctors" className="block py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 border-2 border-blue-200">
               👨‍⚕️ Управление врачами
             </Link>
-            <Link href="/admin/doctors/new" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+            <Link href="/admin/doctors/new" className="block py-3 px-4 bg-green-50 text-green-700 font-semibold rounded-lg hover:bg-green-100 border-2 border-green-200">
               ➕ Добавить врача
             </Link>
-            <Link href="/admin/rooms" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
+            <Link href="/admin/rooms" className="block py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 border-2 border-blue-200">
               🚪 Управление кабинетами
             </Link>
-            <Link href="/admin/rooms/new" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+            <Link href="/admin/rooms/new" className="block py-3 px-4 bg-green-50 text-green-700 font-semibold rounded-lg hover:bg-green-100 border-2 border-green-200">
               ➕ Добавить кабинет
             </Link>
-            <Link href="/admin/users" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
+            <Link href="/admin/users" className="block py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 border-2 border-blue-200">
               👥 Управление пользователями
             </Link>
-            <Link href="/admin/users/new" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+            <Link href="/admin/users/new" className="block py-3 px-4 bg-green-50 text-green-700 font-semibold rounded-lg hover:bg-green-100 border-2 border-green-200">
               ➕ Добавить пользователя
             </Link>
-            <Link href="/admin/appointments" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
+            <Link href="/admin/appointments" className="block py-3 px-4 bg-blue-50 text-blue-700 font-semibold rounded-lg hover:bg-blue-100 border-2 border-blue-200">
               📅 Все записи
             </Link>
           </div>
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Быстрые ссылки</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Быстрые ссылки</h2>
           <div className="space-y-3">
-            <Link href="/" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+            <Link href="/" className="block py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow">
               🏠 На главную
             </Link>
-            <Link href="/schedule" className="block py-2 px-4 bg-green-100 rounded hover:bg-green-200 text-green-700">
-              📅 Расписание
+            <Link href="/schedule" className="block py-3 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow">
+              📅 Календарь записей
             </Link>
-            <Link href="/doctors" className="block py-2 px-4 bg-purple-100 rounded hover:bg-purple-200 text-purple-700">
-              👨‍⚕️ Врачи
+            <Link href="/doctors" className="block py-3 px-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 shadow">
+              👨‍⚕️ Список врачей
             </Link>
           </div>
         </div>

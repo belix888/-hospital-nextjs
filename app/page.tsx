@@ -63,21 +63,21 @@ export default async function HomePage() {
           <div className="space-y-3">
             <Link
               href="/appointments/new"
-              className="block w-full text-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+              className="block w-full text-center px-6 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow-md"
             >
-              Создать новую запись
+              ➕ Создать новую запись
             </Link>
             <Link
               href="/doctors"
-              className="block w-full text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="block w-full text-center px-6 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 shadow-md"
             >
-              Список врачей
+              👨‍⚕️ Список врачей
             </Link>
             <Link
               href="/schedule"
-              className="block w-full text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="block w-full text-center px-6 py-4 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 shadow-md"
             >
-              Расписание на сегодня
+              📅 Календарь записей
             </Link>
           </div>
         </div>

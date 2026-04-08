@@ -6,6 +6,15 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
     const doctorId = searchParams.get('doctorId')
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+
+    // If we have startDate and endDate, get all appointments in range
+    if (startDate && endDate) {
+      const { getAppointmentsByDateRange } = await import('@/lib/db')
+      const appointments = await getAppointmentsByDateRange(startDate, endDate)
+      return Response.json(appointments)
+    }
 
     const appointments = await getAppointments({ date: date || undefined, doctorId: doctorId || undefined })
     return Response.json(appointments)

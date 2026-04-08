@@ -26,22 +26,22 @@ export default function RootLayout({
                     <span className="text-xl font-bold text-blue-600">🏥 Больница</span>
                   </div>
                   <div className="ml-6 flex space-x-4">
-                    <a href="/" className="text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="/" className="text-gray-900 px-4 py-2 rounded-lg text-base font-semibold hover:bg-blue-100">
                       Главная
                     </a>
-                    <a href="/doctors" className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="/doctors" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
                       Врачи
                     </a>
-                    <a href="/appointments" className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                    <a href="/appointments/new" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
                       Записи
                     </a>
-                    <a href="/schedule" className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                      Расписание
+                    <a href="/schedule" className="text-gray-700 px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-100 hover:text-gray-900">
+                      Календарь
                     </a>
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <a href="/admin" className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                <div className="flex items-center gap-3">
+                  <a href="/admin" className="px-4 py-2 bg-blue-600 text-white rounded-lg text-base font-semibold hover:bg-blue-700 shadow">
                     Админка
                   </a>
                 </div>

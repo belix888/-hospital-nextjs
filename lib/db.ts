@@ -215,6 +215,22 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
   return result.rows
 }
 
+export async function getAppointmentsByDateRange(startDate: string, endDate: string) {
+  const query = `
+    SELECT a.*, d.name as doctor_name, d.specialization as doctor_specialization,
+           p.name as patient_name, p.phone as patient_phone,
+           r.name as room_name
+    FROM "Appointment" a
+    JOIN "Doctor" d ON a."doctorId" = d.id
+    JOIN "Patient" p ON a."patientId" = p.id
+    JOIN "Room" r ON a."roomId" = r.id
+    WHERE a."appointmentDate" >= $1 AND a."appointmentDate" <= $2
+    ORDER BY a."appointmentDate", a."appointmentTime"
+  `
+  const result = await pool.query(query, [startDate + ' 00:00:00', endDate + ' 23:59:59'])
+  return result.rows
+}
+
 export async function createAppointment(data: {
   doctorId: string
   patientId: string
