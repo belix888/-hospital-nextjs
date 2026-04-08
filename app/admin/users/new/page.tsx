@@ -7,6 +7,7 @@ interface Doctor {
   id: string
   name: string
   specialization: string
+  email?: string
 }
 
 export default function NewUserPage() {
