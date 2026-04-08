@@ -58,7 +58,7 @@ export default function AdminAppointmentsPage() {
   }
 
   const filteredAppointments = filter 
-    ? appointments.filter(a => a.appointmentDate.startsWith(filter))
+    ? appointments.filter(a => a.appointmentDate && a.appointmentDate.startsWith(filter))
     : appointments
 
   if (loading) {

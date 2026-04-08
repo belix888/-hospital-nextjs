@@ -87,7 +87,7 @@ export default function SchedulePage() {
       const d = new Date(year, month, 1 - i)
       const dateStr = d.toISOString().split('T')[0]
       const dayAppointments = appointments.filter(a => 
-        a.appointmentDate.startsWith(dateStr)
+        a.appointmentDate && a.appointmentDate.startsWith(dateStr)
       )
       days.push({
         date: dateStr,
@@ -104,7 +104,7 @@ export default function SchedulePage() {
       const d = new Date(year, month, i)
       const dateStr = d.toISOString().split('T')[0]
       const dayAppointments = appointments.filter(a => 
-        a.appointmentDate.startsWith(dateStr)
+        a.appointmentDate && a.appointmentDate.startsWith(dateStr)
       )
       days.push({
         date: dateStr,
@@ -122,7 +122,7 @@ export default function SchedulePage() {
       const d = new Date(year, month + 1, i)
       const dateStr = d.toISOString().split('T')[0]
       const dayAppointments = appointments.filter(a => 
-        a.appointmentDate.startsWith(dateStr)
+        a.appointmentDate && a.appointmentDate.startsWith(dateStr)
       )
       days.push({
         date: dateStr,
