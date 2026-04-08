@@ -42,8 +42,12 @@ export function TodayAppointments() {
   }, [user, loading])
 
   const formatTime = (timeStr: string) => {
-    const date = new Date(timeStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    if (!timeStr) return ''
+    // Handle both ISO format with Z and without
+    const date = timeStr.includes('Z') 
+      ? new Date(timeStr) 
+      : new Date(timeStr.replace('Z', '+00:00'))
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   }
 
   // Show only for logged in users (doctors and admins)

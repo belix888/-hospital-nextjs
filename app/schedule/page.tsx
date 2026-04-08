@@ -128,8 +128,11 @@ export default function SchedulePage() {
   }
 
   const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    if (!dateStr) return ''
+    const date = dateStr.includes('Z') 
+      ? new Date(dateStr) 
+      : new Date(dateStr.replace('Z', '+00:00'))
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
   }
 
   const formatDate = (dateStr: string) => {
