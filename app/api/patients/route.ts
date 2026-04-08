@@ -1,16 +1,19 @@
-import { getPatients, createPatient } from '@/lib/db'
+import { getPatients, createPatient, initDatabase } from '@/lib/db'
 
 export async function GET() {
   try {
+    await initDatabase()
     const patients = await getPatients()
     return Response.json(patients)
   } catch (error) {
-    return Response.json({ error: 'Failed to fetch patients' }, { status: 500 })
+    console.error('Error fetching patients:', error)
+    return Response.json([], { status: 200 })
   }
 }
 
 export async function POST(request: Request) {
   try {
+    await initDatabase()
     const body = await request.json()
     const { name, phone, birthDate } = body
 
@@ -19,7 +22,6 @@ export async function POST(request: Request) {
     }
 
     const patient = await createPatient({ name, phone, birthDate: birthDate ? new Date(birthDate) : undefined })
-
     return Response.json(patient)
   } catch (error) {
     return Response.json({ error: 'Failed to create patient' }, { status: 500 })

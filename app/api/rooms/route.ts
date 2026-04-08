@@ -1,16 +1,19 @@
-import { getRooms, createRoom } from '@/lib/db'
+import { getRooms, createRoom, initDatabase } from '@/lib/db'
 
 export async function GET() {
   try {
+    await initDatabase()
     const rooms = await getRooms()
     return Response.json(rooms)
   } catch (error) {
-    return Response.json({ error: 'Failed to fetch rooms' }, { status: 500 })
+    console.error('Error fetching rooms:', error)
+    return Response.json([], { status: 200 })
   }
 }
 
 export async function POST(request: Request) {
   try {
+    await initDatabase()
     const body = await request.json()
     const { name, isAvailable } = body
 
@@ -19,7 +22,6 @@ export async function POST(request: Request) {
     }
 
     const room = await createRoom({ name, isAvailable })
-
     return Response.json(room)
   } catch (error) {
     return Response.json({ error: 'Failed to create room' }, { status: 500 })

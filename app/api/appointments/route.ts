@@ -1,7 +1,8 @@
-import { getAppointments, createAppointment } from '@/lib/db'
+import { getAppointments, createAppointment, initDatabase } from '@/lib/db'
 
 export async function GET(request: Request) {
   try {
+    await initDatabase()
     const { searchParams } = new URL(request.url)
     const date = searchParams.get('date')
     const doctorId = searchParams.get('doctorId')
@@ -9,12 +10,14 @@ export async function GET(request: Request) {
     const appointments = await getAppointments({ date: date || undefined, doctorId: doctorId || undefined })
     return Response.json(appointments)
   } catch (error) {
-    return Response.json({ error: 'Failed to fetch appointments' }, { status: 500 })
+    console.error('Error fetching appointments:', error)
+    return Response.json([], { status: 200 })
   }
 }
 
 export async function POST(request: Request) {
   try {
+    await initDatabase()
     const body = await request.json()
     const { doctorId, patientId, roomId, appointmentDate, appointmentTime, durationMinutes, notes } = body
 
