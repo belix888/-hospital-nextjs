@@ -1,5 +1,6 @@
-import { initDatabase, supabase } from '@/lib/db'
+import { initDatabase, verifyLogin } from '@/lib/db'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
   try {
@@ -12,35 +13,61 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email и пароль обязательны' }, { status: 400 })
     }
 
-    // Check if user exists
-    const { data: users, error } = await supabase
-      .from('User')
-      .select('*')
-      .eq('email', email)
-      .limit(1)
+    // Verify login and get user with doctor info
+    const user = await verifyLogin(email, password)
 
-    if (error) throw error
-
-    if (!users || users.length === 0) {
+    if (!user) {
       return NextResponse.json({ error: 'Неверный email или пароль' }, { status: 401 })
     }
 
-    const user = users[0]
+    // Set session cookie
+    const cookieStore = await cookies()
+    cookieStore.set('session', JSON.stringify({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      doctorId: user.doctorId,
+      doctorName: user.Doctor?.name,
+      doctorSpecialization: user.Doctor?.specialization
+    }), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    })
 
-    // Simple password check (in production use bcrypt)
-    if (user.password !== password) {
-      return NextResponse.json({ error: 'Неверный email или пароль' }, { status: 401 })
-    }
-
-    // Return user info (in production use JWT)
+    // Return user info with doctor details
     return NextResponse.json({
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
+      role: user.role,
+      doctorId: user.doctorId,
+      doctor: user.Doctor ? {
+        id: user.Doctor.id,
+        name: user.Doctor.name,
+        specialization: user.Doctor.specialization
+      } : null
     })
   } catch (error: any) {
     console.error('Login error:', error)
     return NextResponse.json({ error: error.message || 'Ошибка входа' }, { status: 500 })
+  }
+}
+
+export async function GET() {
+  try {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get('session')
+    
+    if (!sessionCookie) {
+      return NextResponse.json({ authenticated: false })
+    }
+    
+    const session = JSON.parse(sessionCookie.value)
+    return NextResponse.json({ authenticated: true, user: session })
+  } catch {
+    return NextResponse.json({ authenticated: false })
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface Doctor {
   id: string
@@ -23,12 +23,17 @@ interface Room {
 
 export default function NewAppointmentPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
+  
+  // Get doctorId from URL query parameter (passed after login)
+  const presetDoctorId = searchParams.get('doctorId')
+  
   const [formData, setFormData] = useState({
-    doctorId: '',
+    doctorId: presetDoctorId || '',
     patientId: '',
     roomId: '',
     date: '',
@@ -49,6 +54,13 @@ export default function NewAppointmentPage() {
       setRooms(r.filter((room: Room) => room.isAvailable))
     })
   }, [])
+
+  // Update doctorId when presetDoctorId changes (after login redirect)
+  useEffect(() => {
+    if (presetDoctorId && !formData.doctorId) {
+      setFormData(prev => ({ ...prev, doctorId: presetDoctorId }))
+    }
+  }, [presetDoctorId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,13 +100,24 @@ export default function NewAppointmentPage() {
       return
     }
 
+    // Validate doctor selection
+    const doctorId = presetDoctorId || formData.doctorId
+    if (!doctorId) {
+      alert('Выберите врача')
+      setLoading(false)
+      return
+    }
+
     try {
+      // Determine doctor ID - use preset (from login) or form selection
+      const doctorId = presetDoctorId || formData.doctorId
+      
       // Send just date and time - let API handle the format
       const res = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          doctorId: formData.doctorId,
+          doctorId: doctorId,
           patientId: finalPatientId,
           roomId: formData.roomId,
           appointmentDate: formData.date,
@@ -144,17 +167,25 @@ export default function NewAppointmentPage() {
       <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-xl p-8 space-y-6">
         <div>
           <label className="block text-lg font-semibold text-gray-700 mb-2">Врач</label>
-          <select
-            required
-            value={formData.doctorId}
-            onChange={e => setFormData({ ...formData, doctorId: e.target.value })}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-lg focus:border-blue-500 focus:outline-none"
-          >
-            <option value="">Выберите врача</option>
-            {doctors.map(d => (
-              <option key={d.id} value={d.id}>{d.name} ({d.specialization})</option>
-            ))}
-          </select>
+          {presetDoctorId ? (
+            // If doctor is preset (logged in doctor), show info instead of dropdown
+            <div className="w-full px-4 py-3 border-2 border-green-200 bg-green-50 rounded-lg text-lg text-green-800">
+              Вы: {doctors.find(d => d.id === presetDoctorId)?.name || 'Врач'} ({doctors.find(d => d.id === presetDoctorId)?.specialization || ''})
+              <input type="hidden" value={presetDoctorId} />
+            </div>
+          ) : (
+            <select
+              required
+              value={formData.doctorId}
+              onChange={e => setFormData({ ...formData, doctorId: e.target.value })}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-lg focus:border-blue-500 focus:outline-none"
+            >
+              <option value="">Выберите врача</option>
+              {doctors.map(d => (
+                <option key={d.id} value={d.id}>{d.name} ({d.specialization})</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div>

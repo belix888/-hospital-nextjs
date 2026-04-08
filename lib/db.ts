@@ -318,20 +318,36 @@ export async function getStats() {
 }
 
 // Users
-export async function createUser(data: { email: string; password: string; name?: string; role?: string }) {
+export async function createUser(data: { email: string; password: string; name?: string; role?: string; doctorId?: string }) {
   const { data: result, error } = await supabase
     .from('User')
     .insert({
       email: data.email,
       password: data.password,
       name: data.name || null,
-      role: data.role || 'user'
+      role: data.role || 'user',
+      doctorId: data.doctorId || null
     })
     .select()
     .single()
   
   if (error) throw error
   return result
+}
+
+// Verify login and get user with doctor info
+export async function verifyLogin(email: string, password: string) {
+  const { data: users, error } = await supabase
+    .from('User')
+    .select('*, Doctor:doctorId(id, name, specialization)')
+    .eq('email', email)
+    .eq('password', password)
+    .limit(1)
+
+  if (error) throw error
+  if (!users || users.length === 0) return null
+  
+  return users[0]
 }
 
 export async function updateUser(data: { id: string; email: string; name?: string; role?: string }) {

@@ -23,7 +23,20 @@ export default function LoginPage() {
       })
 
       if (res.ok) {
-        router.push('/admin')
+        const data = await res.json()
+        
+        // If user is a doctor with doctorId, redirect to create appointment with doctor pre-selected
+        if (data.role === 'doctor' && data.doctorId) {
+          router.push(`/appointments/new?doctorId=${data.doctorId}`)
+        } 
+        // If user is admin, redirect to admin dashboard
+        else if (data.role === 'admin') {
+          router.push('/admin')
+        }
+        // Regular users go to schedule
+        else {
+          router.push('/schedule')
+        }
       } else {
         const data = await res.json()
         alert(data.error || 'Неверный email или пароль')

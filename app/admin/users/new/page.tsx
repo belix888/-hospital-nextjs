@@ -1,15 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+interface Doctor {
+  id: string
+  name: string
+  specialization: string
+}
 
 export default function NewUserPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [doctors, setDoctors] = useState<Doctor[]>([])
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    role: 'user'
+    role: 'user',
+    doctorId: ''
   })
+
+  useEffect(() => {
+    fetch('/api/doctors')
+      .then(r => r.json())
+      .then(data => setDoctors(data))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,7 +40,7 @@ export default function NewUserPage() {
 
       if (res.ok) {
         alert('Пользователь успешно создан!')
-        setFormData({ name: '', email: '', password: '', role: 'user' })
+        setFormData({ name: '', email: '', password: '', role: 'user', doctorId: '' })
       } else {
         const data = await res.json()
         alert(data.error || 'Ошибка при создании пользователя')
@@ -85,6 +101,26 @@ export default function NewUserPage() {
             <option value="doctor">Врач</option>
           </select>
         </div>
+
+        {/* Doctor selection - only show for doctor role */}
+        {formData.role === 'doctor' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Врач (связь с профилем врача)</label>
+            <select
+              value={formData.doctorId}
+              onChange={e => setFormData({ ...formData, doctorId: e.target.value })}
+              className="w-full px-3 py-2 border rounded-md"
+            >
+              <option value="">Выберите врача</option>
+              {doctors.map(d => (
+                <option key={d.id} value={d.id}>{d.name} ({d.specialization})</option>
+              ))}
+            </select>
+            <p className="text-sm text-gray-500 mt-1">
+              Привяжите учетную запись к профилю врача для автоматического подставления при создании записей
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"

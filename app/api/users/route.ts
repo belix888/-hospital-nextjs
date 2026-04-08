@@ -20,13 +20,18 @@ export async function POST(request: Request) {
   try {
     await initDatabase()
     const body = await request.json()
-    const { email, password, name, role } = body
+    const { email, password, name, role, doctorId } = body
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email и пароль обязательны' }, { status: 400 })
     }
 
-    const user = await createUser({ email, password, name, role })
+    // Validate: if role is doctor, doctorId is required
+    if (role === 'doctor' && !doctorId) {
+      return NextResponse.json({ error: 'Для роли "Врач" необходимо выбрать профиль врача' }, { status: 400 })
+    }
+
+    const user = await createUser({ email, password, name, role, doctorId: doctorId || null })
     return NextResponse.json(user)
   } catch (error: any) {
     if (error.code === '23505') {
