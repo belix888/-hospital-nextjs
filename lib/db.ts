@@ -186,15 +186,20 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
   
   if (error) throw error
   
-  // Flatten the data
-  return (data || []).map(item => ({
-    ...item,
-    doctor_name: item.Doctor?.name,
-    doctor_specialization: item.Doctor?.specialization,
-    patient_name: item.Patient?.name,
-    patient_phone: item.Patient?.phone,
-    room_name: item.Room?.name
-  }))
+  // Flatten the data and calculate end time
+  return (data || []).map(item => {
+    const startTime = new Date(item.appointmentTime)
+    const endTime = new Date(startTime.getTime() + (item.durationMinutes || 60) * 60000)
+    return {
+      ...item,
+      doctor_name: item.Doctor?.name,
+      doctor_specialization: item.Doctor?.specialization,
+      patient_name: item.Patient?.name,
+      patient_phone: item.Patient?.phone,
+      room_name: item.Room?.name,
+      endTime: endTime.toISOString()
+    }
+  })
 }
 
 export async function getAppointmentsByDateRange(startDate: string, endDate: string) {
@@ -213,14 +218,20 @@ export async function getAppointmentsByDateRange(startDate: string, endDate: str
   
   if (error) throw error
   
-  return (data || []).map(item => ({
-    ...item,
-    doctor_name: item.Doctor?.name,
-    doctor_specialization: item.Doctor?.specialization,
-    patient_name: item.Patient?.name,
-    patient_phone: item.Patient?.phone,
-    room_name: item.Room?.name
-  }))
+  // Flatten the data and calculate end time
+  return (data || []).map(item => {
+    const startTime = new Date(item.appointmentTime)
+    const endTime = new Date(startTime.getTime() + (item.durationMinutes || 60) * 60000)
+    return {
+      ...item,
+      doctor_name: item.Doctor?.name,
+      doctor_specialization: item.Doctor?.specialization,
+      patient_name: item.Patient?.name,
+      patient_phone: item.Patient?.phone,
+      room_name: item.Room?.name,
+      endTime: endTime.toISOString()
+    }
+  })
 }
 
 export async function createAppointment(data: {

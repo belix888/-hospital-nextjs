@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 function LoginForm() {
@@ -29,16 +29,13 @@ function LoginForm() {
       if (res.ok) {
         const data = await res.json()
         
-        // If user is a doctor with doctorId, redirect to create appointment with doctor pre-selected
         if (data.role === 'doctor' && data.doctorId) {
           const targetUrl = redirect || `/appointments/new?doctorId=${data.doctorId}`
           router.push(targetUrl)
         } 
-        // If user is admin, redirect to admin dashboard
         else if (data.role === 'admin') {
           router.push('/admin')
         }
-        // Regular users go to schedule
         else {
           router.push('/schedule')
         }
@@ -106,17 +103,19 @@ function LoginForm() {
   )
 }
 
-import { Suspense } from 'react'
+function LoginLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+        <p className="text-center text-gray-500">Загрузка...</p>
+      </div>
+    </div>
+  )
+}
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
-          <p className="text-center text-gray-500">Загрузка...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoginLoading />}>
       <LoginForm />
     </Suspense>
   )

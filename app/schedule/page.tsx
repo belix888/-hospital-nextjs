@@ -279,6 +279,11 @@ export default function SchedulePage() {
                         <span className="text-lg font-bold text-blue-700">
                           {formatTime(apt.appointmentTime)}
                         </span>
+                        {apt.endTime && (
+                          <span className="text-gray-500 ml-2">
+                             - {formatTime(apt.endTime)}
+                          </span>
+                        )}
                       </div>
                       <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
                         apt.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :

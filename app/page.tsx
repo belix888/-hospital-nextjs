@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getStats, initDatabase } from '@/lib/db'
 import { AuthCheck } from '@/components/AuthCheck'
+import { TodayAppointments } from '@/components/TodayAppointments'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,18 +65,7 @@ export default async function HomePage() {
           <AuthCheck />
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Вход для врачей</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Войдите в систему для создания записей пациентов и просмотра расписания
-          </p>
-          <Link
-            href="/login"
-            className="block w-full text-center px-6 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-md"
-          >
-            🔐 Вход для врачей
-          </Link>
-        </div>
+        <TodayAppointments />
       </div>
     </div>
   )

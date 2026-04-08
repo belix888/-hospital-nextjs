@@ -26,10 +26,22 @@ function AppointmentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading: authLoading } = useAuth()
+  
+  // All useState calls must be at the top
   const [loading, setLoading] = useState(false)
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [patients, setPatients] = useState<Patient[]>([])
   const [rooms, setRooms] = useState<Room[]>([])
+  const [formData, setFormData] = useState({
+    doctorId: '',
+    patientId: '',
+    roomId: '',
+    date: '',
+    time: '',
+    durationMinutes: 60,
+    notes: ''
+  })
+  const [newPatient, setNewPatient] = useState({ name: '', phone: '' })
   
   // Get doctorId from URL query parameter (passed after login)
   const presetDoctorId = searchParams.get('doctorId')
@@ -59,17 +71,13 @@ function AppointmentContent() {
   if (!isAuthorized) {
     return null
   }
-  
-  const [formData, setFormData] = useState({
-    doctorId: presetDoctorId || '',
-    patientId: '',
-    roomId: '',
-    date: '',
-    time: '',
-    durationMinutes: 60,
-    notes: ''
-  })
-  const [newPatient, setNewPatient] = useState({ name: '', phone: '' })
+
+  // Initialize form data with preset doctor
+  useEffect(() => {
+    if (presetDoctorId && !formData.doctorId) {
+      setFormData(prev => ({ ...prev, doctorId: presetDoctorId }))
+    }
+  }, [presetDoctorId])
 
   useEffect(() => {
     Promise.all([
@@ -82,13 +90,6 @@ function AppointmentContent() {
       setRooms(r.filter((room: Room) => room.isAvailable))
     })
   }, [])
-
-  // Update doctorId when presetDoctorId changes (after login redirect)
-  useEffect(() => {
-    if (presetDoctorId && !formData.doctorId) {
-      setFormData(prev => ({ ...prev, doctorId: presetDoctorId }))
-    }
-  }, [presetDoctorId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
