@@ -22,7 +22,7 @@ interface Room {
   isAvailable: boolean
 }
 
-function NewAppointmentForm() {
+function AppointmentContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading: authLoading } = useAuth()
@@ -44,7 +44,8 @@ function NewAppointmentForm() {
     }
   }, [authLoading, isAuthorized, router])
 
-  if (authLoading || !isAuthorized) {
+  // Show loading while checking auth
+  if (authLoading) {
     return (
       <div className="px-4 py-6 sm:px-0 max-w-2xl mx-auto">
         <div className="bg-white shadow-lg rounded-xl p-8 text-center">
@@ -52,6 +53,11 @@ function NewAppointmentForm() {
         </div>
       </div>
     )
+  }
+
+  // If not authorized, don't render form
+  if (!isAuthorized) {
+    return null
   }
   
   const [formData, setFormData] = useState({
@@ -357,7 +363,7 @@ export default function NewAppointmentPage() {
         </div>
       </div>
     }>
-      <NewAppointmentForm />
+      <AppointmentContent />
     </Suspense>
   )
 }
