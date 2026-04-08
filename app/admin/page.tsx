@@ -53,6 +53,9 @@ export default async function AdminPage() {
             <Link href="/admin/users" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
               👥 Управление пользователями
             </Link>
+            <Link href="/admin/users/new" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+              ➕ Добавить пользователя
+            </Link>
             <Link href="/admin/appointments" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
               📅 Все записи
             </Link>

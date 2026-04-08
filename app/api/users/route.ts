@@ -1,5 +1,15 @@
-import { createUser, initDatabase } from '@/lib/db'
+import { createUser, initDatabase, pool } from '@/lib/db'
 import { NextResponse } from 'next/server'
+
+export async function GET() {
+  try {
+    await initDatabase()
+    const result = await pool.query('SELECT id, email, name, role, "createdAt" FROM "User" ORDER BY "createdAt" DESC')
+    return NextResponse.json(result.rows)
+  } catch (error) {
+    return NextResponse.json({ error: 'Ошибка получения пользователей' }, { status: 500 })
+  }
+}
 
 export async function POST(request: Request) {
   try {
