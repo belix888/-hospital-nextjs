@@ -47,9 +47,12 @@ export default function SchedulePage() {
     const start = startOfMonth.toISOString().split('T')[0]
     const end = endOfMonth.toISOString().split('T')[0]
     
+    console.log('Fetching appointments for', start, 'to', end)
+    
     fetch(`/api/appointments?startDate=${start}&endDate=${end}`)
       .then(res => res.json())
       .then(data => {
+        console.log('Got appointments:', data)
         setAppointments(data)
         setLoading(false)
       })
