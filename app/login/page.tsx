@@ -8,6 +8,7 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || ''
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -16,6 +17,7 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
 
     try {
       const res = await fetch('/api/auth/login', {
@@ -42,10 +44,10 @@ function LoginForm() {
         }
       } else {
         const data = await res.json()
-        alert(data.error || 'Неверный email или пароль')
+        setError(data.error || 'Неверный email или пароль')
       }
     } catch (err) {
-      alert('Ошибка входа')
+      setError('Ошибка соединения. Попробуйте позже.')
     } finally {
       setLoading(false)
     }
@@ -57,6 +59,13 @@ function LoginForm() {
         <div>
           <h2 className="text-center text-3xl font-bold text-gray-900">Вход в систему</h2>
         </div>
+        
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -64,7 +73,10 @@ function LoginForm() {
               type="email"
               required
               value={formData.email}
-              onChange={e => setFormData({ ...formData, email: e.target.value })}
+              onChange={e => {
+                setFormData({ ...formData, email: e.target.value })
+                setError('')
+              }}
               className="mt-1 block w-full px-3 py-2 border rounded-md"
             />
           </div>
@@ -74,7 +86,10 @@ function LoginForm() {
               type="password"
               required
               value={formData.password}
-              onChange={e => setFormData({ ...formData, password: e.target.value })}
+              onChange={e => {
+                setFormData({ ...formData, password: e.target.value })
+                setError('')
+              }}
               className="mt-1 block w-full px-3 py-2 border rounded-md"
             />
           </div>
