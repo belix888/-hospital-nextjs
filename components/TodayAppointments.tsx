@@ -11,6 +11,7 @@ interface AppointmentInfo {
   room_name: string
   appointmentTime: string
   endTime: string
+  durationMinutes?: number
 }
 
 export function TodayAppointments() {
@@ -27,9 +28,12 @@ export function TodayAppointments() {
         ? `/api/appointments?date=${today}&doctorId=${user.doctorId}`
         : `/api/appointments?date=${today}`
       
+      console.log('TodayAppointments: Fetching from', url)
+      
       fetch(url)
         .then(r => r.json())
         .then(data => {
+          console.log('TodayAppointments: Got data', data)
           setAppointments(data.slice(0, 5))
           setLoadingData(false)
         })

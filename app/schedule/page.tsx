@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 interface Appointment {
   id: string
   appointmentDate: string
