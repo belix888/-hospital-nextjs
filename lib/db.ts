@@ -73,6 +73,19 @@ export async function initDatabase() {
       )
     `)
 
+    // Create User table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "User" (
+        "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        "email" VARCHAR(255) NOT NULL UNIQUE,
+        "password" VARCHAR(255) NOT NULL,
+        "name" VARCHAR(255),
+        "role" VARCHAR(50) DEFAULT 'user',
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `)
+
     // Insert sample data if tables are empty
     const doctorCount = await pool.query('SELECT COUNT(*) FROM "Doctor"')
     if (parseInt(doctorCount.rows[0].count) === 0) {
@@ -81,6 +94,15 @@ export async function initDatabase() {
         ('Иванов Иван Иванович', 'Терапевт', '+7 999 123-45-67', 'ivanov@hospital.ru'),
         ('Петрова Анна Сергеевна', 'Кардиолог', '+7 999 234-56-78', 'petrova@hospital.ru'),
         ('Сидоров Алексей Петрович', 'Хирург', '+7 999 345-67-89', 'sidorov@hospital.ru')
+      `)
+    }
+
+    // Create default admin user if not exists
+    const userCount = await pool.query('SELECT COUNT(*) FROM "User"')
+    if (parseInt(userCount.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO "User" (email, password, name, role) VALUES
+        ('admin@hospital.ru', 'admin123', 'Администратор', 'admin')
       `)
     }
 
@@ -252,4 +274,15 @@ export async function getStats() {
       totalAppointments: 0
     }
   }
+}
+
+// Users
+export async function createUser(data: { email: string; password: string; name?: string; role?: string }) {
+  const result = await pool.query(
+    `INSERT INTO "User" (email, password, name, role, "createdAt", "updatedAt")
+     VALUES ($1, $2, $3, $4, NOW(), NOW())
+     RETURNING *`,
+    [data.email, data.password, data.name || null, data.role || 'user']
+  )
+  return result.rows[0]
 }

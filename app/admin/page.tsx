@@ -8,7 +8,12 @@ export default async function AdminPage() {
 
   return (
     <div className="px-4 py-6 sm:px-0">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Админ-панель</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Админ-панель</h1>
+        <Link href="/login" className="text-blue-600 hover:underline">
+          Выход
+        </Link>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-blue-50 p-4 rounded-lg">
@@ -36,11 +41,17 @@ export default async function AdminPage() {
             <Link href="/admin/doctors" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
               👨‍⚕️ Управление врачами
             </Link>
-            <Link href="/admin/patients" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
-              👤 Управление пациентами
+            <Link href="/admin/doctors/new" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+              ➕ Добавить врача
             </Link>
             <Link href="/admin/rooms" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
               🚪 Управление кабинетами
+            </Link>
+            <Link href="/admin/rooms/new" className="block py-2 px-4 bg-blue-100 rounded hover:bg-blue-200 text-blue-700">
+              ➕ Добавить кабинет
+            </Link>
+            <Link href="/admin/users" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
+              👥 Управление пользователями
             </Link>
             <Link href="/admin/appointments" className="block py-2 px-4 bg-gray-100 rounded hover:bg-gray-200">
               📅 Все записи
