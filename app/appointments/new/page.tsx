@@ -87,6 +87,10 @@ export default function NewAppointmentPage() {
     }
 
     try {
+      // Ensure date and time are in correct format
+      const dateStr = formData.date.split('T')[0] // Get just the date part
+      const timeStr = formData.time.split(':')[0] + ':' + formData.time.split(':')[1] // Get HH:MM
+      
       const res = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,8 +98,8 @@ export default function NewAppointmentPage() {
           doctorId: formData.doctorId,
           patientId: finalPatientId,
           roomId: formData.roomId,
-          appointmentDate: formData.date,
-          appointmentTime: `${formData.date}T${formData.time}:00`,
+          appointmentDate: dateStr,
+          appointmentTime: `${dateStr}T${timeStr}:00`,
           durationMinutes: formData.durationMinutes,
           notes: formData.notes
         })
