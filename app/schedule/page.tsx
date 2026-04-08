@@ -159,7 +159,7 @@ export default function SchedulePage() {
     <div className="px-4 py-6 sm:px-0">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Календарь записей</h1>
-        {canCreateAppointments ? (
+        {canCreateAppointments && user?.doctorId ? (
           <Link
             href={`/appointments/new?doctorId=${user.doctorId}`}
             className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 shadow-md"
