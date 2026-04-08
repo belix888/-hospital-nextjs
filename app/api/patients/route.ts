@@ -5,9 +5,9 @@ export async function GET() {
     await initDatabase()
     const patients = await getPatients()
     return Response.json(patients)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching patients:', error)
-    return Response.json([], { status: 200 })
+    return Response.json({ error: error.message }, { status: 500 })
   }
 }
 
@@ -21,9 +21,9 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Name and phone are required' }, { status: 400 })
     }
 
-    const patient = await createPatient({ name, phone, birthDate: birthDate ? new Date(birthDate) : undefined })
+    const patient = await createPatient({ name, phone, birthDate: birthDate || undefined })
     return Response.json(patient)
-  } catch (error) {
-    return Response.json({ error: 'Failed to create patient' }, { status: 500 })
+  } catch (error: any) {
+    return Response.json({ error: error.message || 'Failed to create patient' }, { status: 500 })
   }
 }
