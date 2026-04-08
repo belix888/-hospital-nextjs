@@ -34,12 +34,32 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Fix: ensure timestamp is in correct format YYYY-MM-DDTHH:MM:SS
+    let finalTime = appointmentTime
+    
+    if (!appointmentTime.includes('T')) {
+      // appointmentTime is just "HH:MM" - combine with date
+      finalTime = `${appointmentDate}T${appointmentTime}:00`
+    } else {
+      // Already has T, extract just the time part if duplicated
+      const parts = appointmentTime.split('T')
+      if (parts.length > 1) {
+        // Already has full timestamp - but need to ensure it's not duplicated
+        const timePart = parts[parts.length - 1]
+        if (timePart && timePart.length >= 5) {
+          finalTime = `${appointmentDate}T${timePart.substring(0, 8)}`
+        }
+      }
+    }
+
+    console.log('Creating appointment with:', { appointmentDate, appointmentTime: finalTime })
+
     const appointment = await createAppointment({
       doctorId,
       patientId,
       roomId,
       appointmentDate: appointmentDate,
-      appointmentTime: appointmentDate + 'T' + appointmentTime + ':00',
+      appointmentTime: finalTime,
       durationMinutes,
       notes
     })

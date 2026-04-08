@@ -56,8 +56,8 @@ export default function NewAppointmentPage() {
 
     let finalPatientId = formData.patientId
 
-    // If no patients exist, create a new one first
-    if (patients.length === 0 && newPatient.name && newPatient.phone) {
+    // If no patient selected but new patient data provided, create new patient
+    if (!finalPatientId && newPatient.name && newPatient.phone) {
       try {
         const res = await fetch('/api/patients', {
           method: 'POST',
@@ -68,6 +68,8 @@ export default function NewAppointmentPage() {
         if (res.ok) {
           const patient = await res.json()
           finalPatientId = patient.id
+          // Add to local list
+          setPatients([...patients, patient])
         } else {
           alert('Ошибка при создании пациента')
           setLoading(false)
@@ -87,24 +89,7 @@ export default function NewAppointmentPage() {
     }
 
     try {
-      // Debug: check what we're getting
-      console.log('formData.date:', formData.date)
-      console.log('formData.time:', formData.time)
-      
-      // Extract date part - take first 10 characters (YYYY-MM-DD)
-      // or split by T if the value contains T
-      const dateClean = formData.date.includes('T') 
-        ? formData.date.split('T')[0] 
-        : formData.date.substring(0, 10)
-      
-      // Extract time part - take first 5 characters (HH:MM)
-      const timeClean = formData.time.includes('T')
-        ? formData.time.split('T')[1].substring(0, 5)
-        : formData.time.substring(0, 5)
-      
-      console.log('Clean date:', dateClean, 'Clean time:', timeClean)
-      console.log('Full timestamp:', `${dateClean}T${timeClean}:00`)
-      
+      // Send just date and time - let API handle the format
       const res = await fetch('/api/appointments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -112,8 +97,8 @@ export default function NewAppointmentPage() {
           doctorId: formData.doctorId,
           patientId: finalPatientId,
           roomId: formData.roomId,
-          appointmentDate: dateClean,
-          appointmentTime: `${dateClean}T${timeClean}:00`,
+          appointmentDate: formData.date,
+          appointmentTime: formData.time,
           durationMinutes: formData.durationMinutes,
           notes: formData.notes
         })
@@ -174,43 +159,52 @@ export default function NewAppointmentPage() {
 
         <div>
           <label className="block text-lg font-semibold text-gray-700 mb-2">Пациент</label>
-          {patients.length > 0 ? (
-            <select
-              required
-              value={formData.patientId}
-              onChange={e => setFormData({ ...formData, patientId: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-lg focus:border-blue-500 focus:outline-none"
-            >
-              <option value="">Выберите пациента</option>
-              {patients.map(p => (
-                <option key={p.id} value={p.id}>{p.name} ({p.phone})</option>
-              ))}
-            </select>
-          ) : (
-            <div className="space-y-3 p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
+          
+          {/* Always show option to select existing patient if available */}
+          {patients.length > 0 && (
+            <div className="mb-3">
+              <select
+                value={formData.patientId}
+                onChange={e => {
+                  setFormData({ ...formData, patientId: e.target.value })
+                  if (e.target.value) setNewPatient({ name: '', phone: '' })
+                }}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-lg focus:border-blue-500 focus:outline-none"
+              >
+                <option value="">Выберите пациента</option>
+                {patients.map(p => (
+                  <option key={p.id} value={p.id}>{p.name} ({p.phone})</option>
+                ))}
+              </select>
+            </div>
+          )}
+          
+          {/* Always show option to create new patient */}
+          <div className="p-4 bg-yellow-50 rounded-lg border-2 border-yellow-200">
+            <p className="text-sm font-semibold text-gray-700 mb-2">Или создайте нового пациента:</p>
+            <div className="space-y-2">
               <input
                 type="text"
                 placeholder="ФИО пациента"
                 value={newPatient.name}
-                onChange={e => setNewPatient({ ...newPatient, name: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-lg focus:border-blue-500 focus:outline-none"
+                onChange={e => {
+                  setNewPatient({ ...newPatient, name: e.target.value })
+                  setFormData({ ...formData, patientId: '' }) // Clear selected patient
+                }}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg"
               />
               <input
                 type="tel"
                 placeholder="Телефон"
                 value={newPatient.phone}
-                onChange={e => setNewPatient({ ...newPatient, phone: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-lg focus:border-blue-500 focus:outline-none"
+                onChange={e => {
+                  setNewPatient({ ...newPatient, phone: e.target.value })
+                  setFormData({ ...formData, patientId: '' }) // Clear selected patient
+                }}
+                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg"
               />
-              <button
-                type="button"
-                onClick={handleCreatePatient}
-                className="text-base text-blue-600 font-semibold hover:underline"
-              >
-                + Добавить нового пациента
-              </button>
             </div>
-          )}
+          </div>
         </div>
 
         <div>
