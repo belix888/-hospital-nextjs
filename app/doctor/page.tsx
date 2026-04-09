@@ -215,45 +215,45 @@ function DoctorCabinet() {
         {loading ? (
           <p className="text-gray-500">Загрузка...</p>
         ) : activeAppointments.length === 0 ? (
-          <p className="text-gray-500">Нет активных записей на этот день</p>
+          <p className="text-gray-500 dark:text-gray-400">Нет активных записей на этот день</p>
         ) : (
           <div className="space-y-4">
             {activeAppointments.map(apt => (
-              <div key={apt.id} className="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
+              <div key={apt.id} className="border border-yellow-200 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/50 rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <span className="text-lg font-bold text-blue-700">
+                    <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
                       {formatTime(apt.appointmentTime)} - {getEndTime(apt)}
                     </span>
-                    <span className="ml-2 text-gray-500 text-sm">({apt.durationMinutes} мин)</span>
+                    <span className="ml-2 text-gray-500 dark:text-gray-400 text-sm">({apt.durationMinutes} мин)</span>
                   </div>
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-sm font-semibold rounded-full">
+                  <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 text-sm font-semibold rounded-full">
                     Запланировано
                   </span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2 text-sm mb-3">
                   <div>
-                    <span className="text-gray-500">Пациент:</span>
-                    <span className="font-medium ml-1">{apt.patient_name}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Пациент:</span>
+                    <span className="font-medium ml-1 dark:text-gray-200">{apt.patient_name}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Телефон:</span>
-                    <span className="font-medium ml-1">{apt.patient_phone}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Телефон:</span>
+                    <span className="font-medium ml-1 dark:text-gray-200">{apt.patient_phone}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Кабинет:</span>
-                    <span className="font-medium ml-1">{apt.room_name}</span>
+                    <span className="text-gray-500 dark:text-gray-400">Кабинет:</span>
+                    <span className="font-medium ml-1 dark:text-gray-200">{apt.room_name}</span>
                   </div>
                   {apt.notes && (
                     <div className="col-span-2">
-                      <span className="text-gray-500">Заметки:</span>
-                      <span className="ml-1">{apt.notes}</span>
+                      <span className="text-gray-500 dark:text-gray-400">Заметки:</span>
+                      <span className="ml-1 dark:text-gray-300">{apt.notes}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => {
                       setSelectedAppointment(apt)
@@ -284,17 +284,17 @@ function DoctorCabinet() {
 
       {/* Completed appointments */}
       {completedAppointments.length > 0 && (
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Завершенные приёмы</h2>
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Завершенные приёмы</h2>
           <div className="space-y-3">
             {completedAppointments.map(apt => (
-              <div key={apt.id} className="border border-gray-200 bg-gray-50 rounded-lg p-4">
+              <div key={apt.id} className="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="font-medium">{formatTime(apt.appointmentTime)}</span>
-                    <span className="ml-3 text-gray-600">{apt.patient_name}</span>
+                    <span className="font-medium dark:text-gray-200">{formatTime(apt.appointmentTime)}</span>
+                    <span className="ml-3 text-gray-600 dark:text-gray-400">{apt.patient_name}</span>
                   </div>
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-semibold rounded-full">
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-sm font-semibold rounded-full">
                     Завершено
                   </span>
                 </div>
@@ -307,17 +307,17 @@ function DoctorCabinet() {
       {/* Extend Modal */}
       {showExtendModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Продлить запись</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Продлить запись</h3>
             
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Добавить время:
               </label>
               <select
                 value={extendMinutes}
                 onChange={e => setExtendMinutes(parseInt(e.target.value))}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value={15}>15 минут</option>
                 <option value={30}>30 минут</option>
@@ -328,14 +328,14 @@ function DoctorCabinet() {
               </select>
             </div>
 
-            <div className="mb-4 p-3 bg-yellow-50 rounded-lg text-sm">
-              <p className="font-medium">Текущее время приёма:</p>
-              <p>
+            <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/50 rounded-lg text-sm">
+              <p className="font-medium dark:text-gray-200">Текущее время приёма:</p>
+              <p className="dark:text-gray-300">
                 {formatTime(selectedAppointment.appointmentTime)} - {getEndTime(selectedAppointment)}
                 {' '}({selectedAppointment.durationMinutes} мин)
               </p>
-              <p className="mt-1 font-medium">Новое время приёма:</p>
-              <p>
+              <p className="mt-1 font-medium dark:text-gray-200">Новое время приёма:</p>
+              <p className="dark:text-gray-300">
                 {formatTime(selectedAppointment.appointmentTime)} - {
                   (() => {
                     if (!selectedAppointment.appointmentTime) return ''

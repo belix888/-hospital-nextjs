@@ -89,13 +89,15 @@ export default function SchedulePage() {
       const dayAppointments = appointments.filter(a => 
         a.appointmentDate && a.appointmentDate.startsWith(dateStr)
       )
+      // Только запланированные записи считаются для отображения на дне
+      const scheduledCount = dayAppointments.filter(a => a.status === 'scheduled').length
       days.push({
         date: dateStr,
         isCurrentMonth: false,
         isToday: dateStr === today,
-        hasAppointments: dayAppointments.length > 0,
-        appointmentCount: dayAppointments.length,
-        appointments: dayAppointments
+        hasAppointments: scheduledCount > 0,
+        appointmentCount: scheduledCount,
+        appointments: dayAppointments // Все записи для детального просмотра
       })
     }
     
@@ -106,13 +108,15 @@ export default function SchedulePage() {
       const dayAppointments = appointments.filter(a => 
         a.appointmentDate && a.appointmentDate.startsWith(dateStr)
       )
+      // Только запланированные записи считаются для отображения на дне
+      const scheduledCount = dayAppointments.filter(a => a.status === 'scheduled').length
       days.push({
         date: dateStr,
         isCurrentMonth: true,
         isToday: dateStr === today,
-        hasAppointments: dayAppointments.length > 0,
-        appointmentCount: dayAppointments.length,
-        appointments: dayAppointments
+        hasAppointments: scheduledCount > 0,
+        appointmentCount: scheduledCount,
+        appointments: dayAppointments // Все записи для детального просмотра
       })
     }
     
@@ -124,13 +128,15 @@ export default function SchedulePage() {
       const dayAppointments = appointments.filter(a => 
         a.appointmentDate && a.appointmentDate.startsWith(dateStr)
       )
+      // Только запланированные записи считаются для отображения на дне
+      const scheduledCount = dayAppointments.filter(a => a.status === 'scheduled').length
       days.push({
         date: dateStr,
         isCurrentMonth: false,
         isToday: dateStr === today,
-        hasAppointments: dayAppointments.length > 0,
-        appointmentCount: dayAppointments.length,
-        appointments: dayAppointments
+        hasAppointments: scheduledCount > 0,
+        appointmentCount: scheduledCount,
+        appointments: dayAppointments // Все записи для детального просмотра
       })
     }
     

@@ -53,6 +53,18 @@ export function AuthCheck() {
 
   const formatTime = (timeStr: string | null | undefined) => {
     if (!timeStr) return ''
+    // Если строка содержит только время (HH:MM), выводим как есть
+    if (timeStr.match(/^\d{2}:\d{2}(:\d{2})?$/)) {
+      return timeStr.substring(0, 5)
+    }
+    // Если это ISO строка с датой и временем (содержит 'T'), извлекаем время напрямую
+    if (timeStr.includes('T')) {
+      const timePart = timeStr.split('T')[1]
+      if (timePart) {
+        return timePart.substring(0, 5)
+      }
+    }
+    // Иначе пробуем парсить
     try {
       const date = new Date(timeStr)
       return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
