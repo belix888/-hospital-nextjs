@@ -191,6 +191,9 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
     var duration = parseInt(String(item.durationMinutes), 10) || 60
     var endTime = new Date(startTime.getTime() + duration * 60 * 1000)
     return {
+      ...item, // Include all original fields including appointmentDate and appointmentTime
+      appointmentDate: item.appointmentDate,
+      appointmentTime: item.appointmentTime,
       durationMinutes: duration,
       doctor_name: item.Doctor ? item.Doctor.name : null,
       doctor_specialization: item.Doctor ? item.Doctor.specialization : null,
@@ -223,6 +226,9 @@ export async function getAppointmentsByDateRange(startDate: string, endDate: str
     var duration = parseInt(String(item.durationMinutes), 10) || 60
     var endTime = new Date(startTime.getTime() + duration * 60 * 1000)
     return {
+      ...item, // Include all original fields including appointmentDate and appointmentTime
+      appointmentDate: item.appointmentDate,
+      appointmentTime: item.appointmentTime,
       durationMinutes: duration,
       doctor_name: item.Doctor ? item.Doctor.name : null,
       doctor_specialization: item.Doctor ? item.Doctor.specialization : null,
