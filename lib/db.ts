@@ -186,23 +186,51 @@ export async function getAppointments(filters?: { date?: string; doctorId?: stri
   
   if (error) throw error
   
-  return (data || []).map(function(item: any) {
+  // Auto-complete appointments that have passed their end time
+  const now = new Date()
+  const appointmentsToUpdate: string[] = []
+  
+  const processedData = (data || []).map(function(item: any) {
     var startTime = new Date(item.appointmentTime)
     var duration = parseInt(String(item.durationMinutes), 10) || 60
     var endTime = new Date(startTime.getTime() + duration * 60 * 1000)
+    
+    // Check if appointment should be auto-completed
+    if (item.status === 'scheduled' && endTime < now) {
+      appointmentsToUpdate.push(item.id)
+    }
+    
     return {
       ...item, // Include all original fields including appointmentDate and appointmentTime
       appointmentDate: item.appointmentDate,
       appointmentTime: item.appointmentTime,
       durationMinutes: duration,
+      endTime: endTime.toISOString(),
       doctor_name: item.Doctor ? item.Doctor.name : null,
       doctor_specialization: item.Doctor ? item.Doctor.specialization : null,
       patient_name: item.Patient ? item.Patient.name : null,
       patient_phone: item.Patient ? item.Patient.phone : null,
-      room_name: item.Room ? item.Room.name : null,
-      endTime: endTime.toISOString()
+      room_name: item.Room ? item.Room.name : null
     }
   })
+  
+  // Auto-complete overdue appointments in background (fire and forget)
+  if (appointmentsToUpdate.length > 0) {
+    console.log('Auto-completing overdue appointments:', appointmentsToUpdate.length)
+    supabase
+      .from('Appointment')
+      .update({ status: 'completed' })
+      .in('id', appointmentsToUpdate)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Error auto-completing appointments:', error)
+        } else {
+          console.log('Successfully auto-completed', appointmentsToUpdate.length, 'appointments')
+        }
+      })
+  }
+  
+  return processedData
 }
 
 export async function getAppointmentsByDateRange(startDate: string, endDate: string) {
@@ -220,24 +248,52 @@ export async function getAppointmentsByDateRange(startDate: string, endDate: str
     .order('appointmentTime')
   
   if (error) throw error
+
+  // Auto-complete appointments that have passed their end time
+  const now = new Date()
+  const appointmentsToUpdate: string[] = []
     
-  return (data || []).map(function(item: any) {
+  const processedData = (data || []).map(function(item: any) {
     var startTime = new Date(item.appointmentTime)
     var duration = parseInt(String(item.durationMinutes), 10) || 60
     var endTime = new Date(startTime.getTime() + duration * 60 * 1000)
+
+    // Check if appointment should be auto-completed
+    if (item.status === 'scheduled' && endTime < now) {
+      appointmentsToUpdate.push(item.id)
+    }
+
     return {
       ...item, // Include all original fields including appointmentDate and appointmentTime
       appointmentDate: item.appointmentDate,
       appointmentTime: item.appointmentTime,
       durationMinutes: duration,
+      endTime: endTime.toISOString(),
       doctor_name: item.Doctor ? item.Doctor.name : null,
       doctor_specialization: item.Doctor ? item.Doctor.specialization : null,
       patient_name: item.Patient ? item.Patient.name : null,
       patient_phone: item.Patient ? item.Patient.phone : null,
-      room_name: item.Room ? item.Room.name : null,
-      endTime: endTime.toISOString()
+      room_name: item.Room ? item.Room.name : null
     }
   })
+
+  // Auto-complete overdue appointments in background (fire and forget)
+  if (appointmentsToUpdate.length > 0) {
+    console.log('Auto-completing overdue appointments in range:', appointmentsToUpdate.length)
+    supabase
+      .from('Appointment')
+      .update({ status: 'completed' })
+      .in('id', appointmentsToUpdate)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Error auto-completing appointments:', error)
+        } else {
+          console.log('Successfully auto-completed', appointmentsToUpdate.length, 'appointments')
+        }
+      })
+  }
+
+  return processedData
 }
 
 export async function createAppointment(data: {
